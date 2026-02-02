@@ -1,35 +1,79 @@
+import DonasiTabButton from '@/components/DonasiTabButton';
+import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { Platform, Text, View } from 'react-native';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function TabBarIcon({ name, label, focused }: { name: keyof typeof Feather.glyphMap; label: string; focused: boolean }) {
+    return (
+        <View className="items-center justify-center">
+            <Feather name={name} size={24} color={focused ? '#fbbf24' : 'rgba(255, 255, 255, 0.7)'} />
+            <Text
+                className={`text-[10px] mt-1 font-poppins ${focused ? 'text-amber-400 font-medium' : 'text-white/70'
+                    }`}
+                numberOfLines={1}
+            >
+                {label}
+            </Text>
+        </View>
+    );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+    return (
+        <Tabs
+            screenOptions={{
+                headerShown: false,
+                tabBarStyle: {
+                    backgroundColor: '#064e3b',
+                    borderTopColor: 'rgba(4, 120, 87, 0.5)',
+                    height: Platform.OS === 'ios' ? 88 : 68,
+                    paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+                    paddingTop: 8,
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    elevation: 0,
+                    overflow: 'visible',
+                },
+                tabBarShowLabel: false,
+            }}
+        >
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: 'Beranda',
+                    tabBarIcon: ({ focused }) => <TabBarIcon name="home" label="Beranda" focused={focused} />,
+                }}
+            />
+            <Tabs.Screen
+                name="quran"
+                options={{
+                    title: 'Al-Quran',
+                    tabBarIcon: ({ focused }) => <TabBarIcon name="book-open" label="Al-Quran" focused={focused} />,
+                }}
+            />
+            <Tabs.Screen
+                name="donasi"
+                options={{
+                    title: 'Donasi',
+                    tabBarButton: (props) => <DonasiTabButton {...props} style={props.style as any} />,
+                }}
+            />
+            <Tabs.Screen
+                name="doa"
+                options={{
+                    title: 'Doa',
+                    tabBarIcon: ({ focused }) => <TabBarIcon name="heart" label="Doa" focused={focused} />,
+                }}
+            />
+            <Tabs.Screen
+                name="history"
+                options={{
+                    title: 'Riwayat',
+                    tabBarIcon: ({ focused }) => <TabBarIcon name="clipboard" label="Riwayat" focused={focused} />,
+                }}
+            />
+        </Tabs>
+    );
 }

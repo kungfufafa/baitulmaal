@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="id" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembaga Amil Zakat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/_sdk/element_sdk.js"></script>
+    <script src="/_sdk/data_sdk.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Poppins:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        .font-amiri {
+            font-family: 'Amiri', serif;
+        }
+
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlide {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            33% {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+
+            66% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-slide {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .gradient-islamic {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+        }
+
+        .gradient-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+        }
+
+        .pattern-islamic {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='%23ffffff' fill-opacity='0.03'/%3E%3C/svg%3E"), linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .qris-modal {
+            backdrop-filter: blur(10px);
+        }
+
+        .crescent-moon {
+            position: relative;
+        }
+
+        .crescent-moon::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #d4af37;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .crescent-moon::after {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #064e3b;
+            top: 50%;
+            left: 45%;
+            transform: translate(-50%, -50%);
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+            color: #064e3b;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .surah-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
+</head>
+
+<body class="h-full font-poppins bg-emerald-900">
+    <div id="app" class="h-full overflow-auto scroll-container gradient-islamic pattern-islamic"><!-- Header -->
+        <header class="sticky top-0 z-40 bg-emerald-900/95 backdrop-blur-sm border-b border-emerald-700/50">
+            <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 relative crescent-moon"></div>
+                    <div>
+                        <h1 id="org-name" class="text-lg font-bold text-white">Baitul Maal</h1>
+                        <p id="tagline" class="text-xs text-emerald-300">Amanah dalam Berbagi</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p id="hijri-date" class="text-sm text-amber-400 font-medium">-</p>
+                    <p id="current-date" class="text-xs text-emerald-300">-</p>
+                </div>
+            </div>
+        </header>
+        <main class="max-w-md mx-auto pb-24"><!-- Info Slider -->
+            <section class="px-4 py-4">
+                <div
+                    class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-800 to-emerald-700 p-6 min-h-[140px]">
+                    <div id="slider-content" class="relative z-10">
+                        <div class="slide active">
+                            <p class="text-amber-400 text-sm font-medium mb-1">📖 Hadits Hari Ini</p>
+                            <p class="text-white text-sm leading-relaxed">"Sedekah tidak akan mengurangi harta." <span
+                                    class="text-emerald-300 text-xs">(HR. Muslim)</span></p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2"><button
+                            onclick="changeSlide(0)"
+                            class="slide-dot w-2 h-2 rounded-full bg-amber-400 opacity-100"></button> <button
+                            onclick="changeSlide(1)" class="slide-dot w-2 h-2 rounded-full bg-white/40"></button>
+                        <button onclick="changeSlide(2)" class="slide-dot w-2 h-2 rounded-full bg-white/40"></button>
+                    </div>
+                    <div class="absolute top-4 right-4 text-4xl opacity-20">
+                        🕌
+                    </div>
+                </div>
+            </section><!-- Menu Zakat & Infak -->
+            <section class="px-4 py-2">
+                <h2 class="text-white font-semibold mb-3 flex items-center gap-2"><span
+                        class="w-1 h-5 bg-amber-400 rounded-full"></span> Zakat &amp; Infak</h2>
+                <div class="grid grid-cols-2 gap-3"><!-- Zakat Card -->
+                    <div onclick="openPaymentModal('zakat')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-amber-400/20 flex items-center justify-center mb-3">
+                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-semibold text-sm">Bayar Zakat</h3>
+                        <p class="text-emerald-300 text-xs mt-1">Maal, Fitrah, Profesi</p>
+                    </div><!-- Infak Card -->
+                    <div onclick="openPaymentModal('infak')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                        <div class="w-12 h-12 rounded-full bg-emerald-400/20 flex items-center justify-center mb-3">
+                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-semibold text-sm">Infak/Sedekah</h3>
+                        <p class="text-emerald-300 text-xs mt-1">Jariyah, Kemanusiaan</p>
+                    </div>
+                </div>
+            </section><!-- Info Kegiatan -->
+            <section class="px-4 py-4">
+                <h2 class="text-white font-semibold mb-3 flex items-center gap-2"><span
+                        class="w-1 h-5 bg-amber-400 rounded-full"></span> Info Kegiatan</h2>
+                <div class="space-y-3">
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-14 rounded-lg bg-emerald-600 flex items-center justify-center text-2xl">
+                                🤲
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-white font-medium text-sm">Santunan Yatim</h4>
+                                <p class="text-emerald-300 text-xs">Minggu, 15 Jumadil Akhir 1446</p>
+                                <p class="text-amber-400 text-xs mt-1">📍 Masjid Al-Ikhlas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-14 rounded-lg bg-amber-600 flex items-center justify-center text-2xl">
+                                📚
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-white font-medium text-sm">Kajian Rutin</h4>
+                                <p class="text-emerald-300 text-xs">Setiap Sabtu Ba'da Maghrib</p>
+                                <p class="text-amber-400 text-xs mt-1">📍 Aula Baitul Maal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section><!-- Waktu Sholat -->
+            <section class="px-4 py-4">
+                <h2 class="text-white font-semibold mb-3 flex items-center gap-2"><span
+                        class="w-1 h-5 bg-amber-400 rounded-full"></span> Waktu Sholat</h2>
+                <div class="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                    <div class="grid grid-cols-5 gap-2 text-center">
+                        <div class="p-2">
+                            <p class="text-emerald-300 text-xs mb-1">Subuh</p>
+                            <p id="subuh-time" class="text-white font-semibold text-sm">04:30</p>
+                        </div>
+                        <div class="p-2">
+                            <p class="text-emerald-300 text-xs mb-1">Dzuhur</p>
+                            <p id="dzuhur-time" class="text-white font-semibold text-sm">12:00</p>
+                        </div>
+                        <div class="p-2">
+                            <p class="text-emerald-300 text-xs mb-1">Ashar</p>
+                            <p id="ashar-time" class="text-white font-semibold text-sm">15:15</p>
+                        </div>
+                        <div class="p-2">
+                            <p class="text-emerald-300 text-xs mb-1">Maghrib</p>
+                            <p id="maghrib-time" class="text-white font-semibold text-sm">18:00</p>
+                        </div>
+                        <div class="p-2">
+                            <p class="text-emerald-300 text-xs mb-1">Isya</p>
+                            <p id="isya-time" class="text-white font-semibold text-sm">19:15</p>
+                        </div>
+                    </div>
+                    <div id="next-prayer" class="mt-3 pt-3 border-t border-white/10 text-center">
+                        <p class="text-emerald-300 text-xs">Sholat berikutnya</p>
+                        <p class="text-amber-400 font-semibold">Dzuhur dalam 2 jam 30 menit</p>
+                    </div>
+                </div>
+            </section><!-- Pengingat Ngaji -->
+            <section class="px-4 py-4">
+                <h2 class="text-white font-semibold mb-3 flex items-center gap-2"><span
+                        class="w-1 h-5 bg-amber-400 rounded-full"></span> Progress Ngaji Al-Quran</h2>
+                <div class="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/10">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <svg class="w-24 h-24 progress-ring">
+                                <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.1)"
+                                    stroke-width="8" />
+                                <circle id="progress-circle" cx="48" cy="48" r="40" fill="none" stroke="#d4af37"
+                                    stroke-width="8" stroke-linecap="round" stroke-dasharray="251.2"
+                                    stroke-dashoffset="251.2" />
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <p id="progress-percent" class="text-white font-bold text-lg">0%</p>
+                                    <p class="text-emerald-300 text-xs">Khatam</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-1">Juz <span id="current-juz">1</span> / 30</p>
+                            <p class="text-emerald-300 text-sm mb-3">Surah: <span id="current-surah">Al-Fatihah</span>
+                            </p><button onclick="openQuranModal()"
+                                class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-emerald-900 font-semibold rounded-lg text-sm transition-colors">
+                                📖 Lanjutkan Ngaji </button>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-emerald-300 text-xs">Pengingat Ngaji</p>
+                                <p id="reminder-time" class="text-white font-medium">Belum diatur</p>
+                            </div><button onclick="openReminderModal()"
+                                class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition-colors">
+                                ⏰ Atur Pengingat </button>
+                        </div>
+                    </div>
+                </div>
+            </section><!-- Kumpulan Doa -->
+            <section class="px-4 py-4">
+                <h2 class="text-white font-semibold mb-3 flex items-center gap-2"><span
+                        class="w-1 h-5 bg-amber-400 rounded-full"></span> Kumpulan Doa</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div onclick="openDoaModal('pagi')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10 text-center">
+                        <div class="text-3xl mb-2">
+                            🌅
+                        </div>
+                        <p class="text-white font-medium text-sm">Doa Pagi</p>
+                    </div>
+                    <div onclick="openDoaModal('petang')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10 text-center">
+                        <div class="text-3xl mb-2">
+                            🌆
+                        </div>
+                        <p class="text-white font-medium text-sm">Doa Petang</p>
+                    </div>
+                    <div onclick="openDoaModal('tidur')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10 text-center">
+                        <div class="text-3xl mb-2">
+                            🌙
+                        </div>
+                        <p class="text-white font-medium text-sm">Doa Tidur</p>
+                    </div>
+                    <div onclick="openDoaModal('makan')"
+                        class="card-hover cursor-pointer bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10 text-center">
+                        <div class="text-3xl mb-2">
+                            🍽️
+                        </div>
+                        <p class="text-white font-medium text-sm">Doa Makan</p>
+                    </div>
+                </div>
+            </section>
+        </main><!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-emerald-900/95 backdrop-blur border-t border-emerald-700/50 z-50">
+            <div class="max-w-md mx-auto flex justify-around py-2"><button onclick="scrollToTop()"
+                    class="flex flex-col items-center p-2 text-amber-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg><span class="text-xs mt-1">Beranda</span> </button> <button onclick="openQuranModal()"
+                    class="flex flex-col items-center p-2 text-white/70 hover:text-amber-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg><span class="text-xs mt-1">Al-Quran</span> </button> <button
+                    onclick="openPaymentModal('zakat')"
+                    class="flex flex-col items-center p-2 text-white/70 hover:text-amber-400 transition-colors">
+                    <div
+                        class="w-12 h-12 -mt-6 rounded-full gradient-gold flex items-center justify-center shadow-lg pulse-glow">
+                        <span class="text-2xl">💰</span>
+                    </div><span class="text-xs mt-1 text-amber-400">Donasi</span>
+                </button> <button onclick="openDoaModal('pagi')"
+                    class="flex flex-col items-center p-2 text-white/70 hover:text-amber-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg><span class="text-xs mt-1">Doa</span> </button> <button onclick="openHistoryModal()"
+                    class="flex flex-col items-center p-2 text-white/70 hover:text-amber-400 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg><span class="text-xs mt-1">Riwayat</span> </button>
+            </div>
+        </nav><!-- Payment Modal -->
+        <div id="payment-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 qris-modal" onclick="closePaymentModal()"></div>
+            <div
+                class="absolute bottom-0 left-0 right-0 bg-emerald-900 rounded-t-3xl p-6 animate-slide max-h-[90%] overflow-auto">
+                <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4"></div>
+                <h3 id="payment-title" class="text-xl font-bold text-white text-center mb-4">Bayar Zakat</h3>
+                <!-- Payment Type Tabs -->
+                <div id="payment-tabs" class="flex gap-2 mb-4 overflow-x-auto pb-2"><button
+                        onclick="selectPaymentType('maal')"
+                        class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Zakat
+                        Maal</button> <button onclick="selectPaymentType('fitrah')"
+                        class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Zakat
+                        Fitrah</button> <button onclick="selectPaymentType('profesi')"
+                        class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Zakat
+                        Profesi</button>
+                </div><!-- Amount Input -->
+                <div class="mb-4"><label class="text-emerald-300 text-sm mb-2 block">Nominal</label>
+                    <div class="relative"><span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-white font-medium">Rp</span> <input
+                            type="number" id="amount-input" placeholder="0"
+                            class="w-full bg-white/10 border border-white/20 rounded-xl py-3 pl-12 pr-4 text-white text-lg font-medium focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div class="flex gap-2 mt-2 flex-wrap"><button onclick="setAmount(50000)"
+                            class="px-3 py-1 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20">50rb</button>
+                        <button onclick="setAmount(100000)"
+                            class="px-3 py-1 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20">100rb</button>
+                        <button onclick="setAmount(250000)"
+                            class="px-3 py-1 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20">250rb</button>
+                        <button onclick="setAmount(500000)"
+                            class="px-3 py-1 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20">500rb</button>
+                        <button onclick="setAmount(1000000)"
+                            class="px-3 py-1 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20">1jt</button>
+                    </div>
+                </div><!-- Bank Selection -->
+                <div class="mb-4"><label class="text-emerald-300 text-sm mb-2 block">Pilih Bank (QRIS)</label>
+                    <div class="space-y-2"><button onclick="selectBank('bsi')"
+                            class="bank-btn w-full flex items-center gap-3 p-3 bg-white/10 rounded-xl border-2 border-transparent hover:border-amber-400 transition-colors">
+                            <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center"><span
+                                    class="text-emerald-700 font-bold text-sm">BSI</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-white font-medium">Bank Syariah Indonesia</p>
+                                <p class="text-emerald-300 text-xs">QRIS Ready</p>
+                            </div>
+                        </button> <button onclick="selectBank('mandiri')"
+                            class="bank-btn w-full flex items-center gap-3 p-3 bg-white/10 rounded-xl border-2 border-transparent hover:border-amber-400 transition-colors">
+                            <div class="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center"><span
+                                    class="text-yellow-400 font-bold text-sm">MSB</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-white font-medium">Mandiri Syariah</p>
+                                <p class="text-emerald-300 text-xs">QRIS Ready</p>
+                            </div>
+                        </button> <button onclick="selectBank('bni')"
+                            class="bank-btn w-full flex items-center gap-3 p-3 bg-white/10 rounded-xl border-2 border-transparent hover:border-amber-400 transition-colors">
+                            <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center"><span
+                                    class="text-white font-bold text-sm">BNI</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-white font-medium">BNI Syariah</p>
+                                <p class="text-emerald-300 text-xs">QRIS Ready</p>
+                            </div>
+                        </button>
+                    </div>
+                </div><!-- QRIS Display -->
+                <div id="qris-display" class="hidden bg-white rounded-2xl p-6 text-center">
+                    <p class="text-emerald-800 font-semibold mb-3">Scan QRIS untuk Membayar</p>
+                    <div
+                        class="w-48 h-48 mx-auto bg-gray-100 rounded-xl flex items-center justify-center mb-3 relative overflow-hidden">
+                        <!-- Sample QRIS Pattern -->
+                        <svg viewbox="0 0 200 200" class="w-full h-full p-4">
+                            <rect x="10" y="10" width="40" height="40" fill="#000" />
+                            <rect x="15" y="15" width="30" height="30" fill="#fff" />
+                            <rect x="20" y="20" width="20" height="20" fill="#000" />
+                            <rect x="150" y="10" width="40" height="40" fill="#000" />
+                            <rect x="155" y="15" width="30" height="30" fill="#fff" />
+                            <rect x="160" y="20" width="20" height="20" fill="#000" />
+                            <rect x="10" y="150" width="40" height="40" fill="#000" />
+                            <rect x="15" y="155" width="30" height="30" fill="#fff" />
+                            <rect x="20" y="160" width="20" height="20" fill="#000" /> <!-- Pattern dots -->
+                            <g fill="#000">
+                                <rect x="60" y="10" width="8" height="8" />
+                                <rect x="75" y="10" width="8" height="8" />
+                                <rect x="90" y="10" width="8" height="8" />
+                                <rect x="105" y="10" width="8" height="8" />
+                                <rect x="120" y="10" width="8" height="8" />
+                                <rect x="60" y="25" width="8" height="8" />
+                                <rect x="90" y="25" width="8" height="8" />
+                                <rect x="120" y="25" width="8" height="8" />
+                                <rect x="60" y="40" width="8" height="8" />
+                                <rect x="75" y="40" width="8" height="8" />
+                                <rect x="105" y="40" width="8" height="8" /> <!-- More pattern -->
+                                <rect x="10" y="60" width="8" height="8" />
+                                <rect x="25" y="60" width="8" height="8" />
+                                <rect x="40" y="60" width="8" height="8" />
+                                <rect x="60" y="60" width="8" height="8" />
+                                <rect x="90" y="60" width="8" height="8" />
+                                <rect x="120" y="60" width="8" height="8" />
+                                <rect x="150" y="60" width="8" height="8" />
+                                <rect x="180" y="60" width="8" height="8" /> <!-- Center pattern -->
+                                <rect x="80" y="80" width="40" height="40" fill="none" stroke="#000" stroke-width="4" />
+                                <rect x="90" y="90" width="20" height="20" />
+                            </g>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center"><span
+                                    class="text-white font-bold text-xs" id="qris-bank">BSI</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-2">Nominal: <span id="qris-amount"
+                            class="font-bold text-emerald-700">Rp 0</span></p>
+                    <p class="text-gray-500 text-xs">QRIS berlaku untuk semua e-wallet &amp; mobile banking</p><button
+                        onclick="confirmPayment()"
+                        class="mt-4 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors">
+                        ✓ Saya Sudah Bayar </button>
+                </div><button onclick="showQRIS()" id="show-qris-btn"
+                    class="w-full py-3 gradient-gold text-emerald-900 font-semibold rounded-xl mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled> Tampilkan QRIS </button>
+            </div>
+        </div><!-- Quran Modal -->
+        <div id="quran-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 qris-modal" onclick="closeQuranModal()"></div>
+            <div
+                class="absolute bottom-0 left-0 right-0 bg-emerald-900 rounded-t-3xl p-6 animate-slide max-h-[85%] overflow-hidden flex flex-col">
+                <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold text-white text-center mb-4">📖 Al-Quran</h3>
+                <div class="flex-1 overflow-auto scroll-container">
+                    <div class="space-y-2" id="surah-list"><!-- Surah items will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div><!-- Doa Modal -->
+        <div id="doa-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 qris-modal" onclick="closeDoaModal()"></div>
+            <div
+                class="absolute bottom-0 left-0 right-0 bg-emerald-900 rounded-t-3xl p-6 animate-slide max-h-[80%] overflow-auto">
+                <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4"></div>
+                <h3 id="doa-title" class="text-xl font-bold text-white text-center mb-4">Doa</h3>
+                <div id="doa-content" class="space-y-4"><!-- Doa content will be generated here -->
+                </div>
+            </div>
+        </div><!-- Reminder Modal -->
+        <div id="reminder-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 qris-modal" onclick="closeReminderModal()"></div>
+            <div class="absolute bottom-0 left-0 right-0 bg-emerald-900 rounded-t-3xl p-6 animate-slide">
+                <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold text-white text-center mb-4">⏰ Atur Pengingat Ngaji</h3>
+                <div class="mb-4"><label class="text-emerald-300 text-sm mb-2 block">Waktu Pengingat</label> <input
+                        type="time" id="reminder-input"
+                        class="w-full bg-white/10 border border-white/20 rounded-xl py-3 px-4 text-white text-lg focus:outline-none focus:border-amber-400">
+                </div><button onclick="saveReminder()"
+                    class="w-full py-3 gradient-gold text-emerald-900 font-semibold rounded-xl"> Simpan Pengingat
+                </button>
+            </div>
+        </div><!-- History Modal -->
+        <div id="history-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/70 qris-modal" onclick="closeHistoryModal()"></div>
+            <div
+                class="absolute bottom-0 left-0 right-0 bg-emerald-900 rounded-t-3xl p-6 animate-slide max-h-[80%] overflow-hidden flex flex-col">
+                <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mb-4"></div>
+                <h3 class="text-xl font-bold text-white text-center mb-4">📋 Riwayat Donasi</h3>
+                <div id="history-list" class="flex-1 overflow-auto scroll-container space-y-3">
+                    <p class="text-center text-emerald-300 py-8">Belum ada riwayat donasi</p>
+                </div>
+            </div>
+        </div><!-- Khatam Celebration Modal -->
+        <div id="khatam-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/80 qris-modal"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-6">
+                <div
+                    class="bg-gradient-to-b from-emerald-800 to-emerald-900 rounded-3xl p-8 text-center max-w-sm animate-slide">
+                    <div class="text-6xl mb-4 animate-float">
+                        🎉
+                    </div>
+                    <h3 class="text-2xl font-bold text-amber-400 mb-2 font-amiri">ما شاء الله</h3>
+                    <h4 class="text-xl font-bold text-white mb-4">Selamat Khatam Al-Quran!</h4>
+                    <p class="text-emerald-300 mb-6 leading-relaxed">Semoga Allah SWT menerima amal ibadah Anda dan
+                        memberikan keberkahan dalam hidup. Anda telah menyelesaikan 30 Juz Al-Quran. Alhamdulillah! 🤲
+                    </p>
+                    <div class="bg-white/10 rounded-xl p-4 mb-6">
+                        <p class="text-amber-400 font-amiri text-lg mb-2">اللَّهُمَّ ارْحَمْنِى بِالْقُرْآنِ</p>
+                        <p class="text-emerald-200 text-sm">Ya Allah, rahmatilah aku dengan Al-Quran</p>
+                    </div><button onclick="closeKhatamModal()"
+                        class="w-full py-3 gradient-gold text-emerald-900 font-semibold rounded-xl"> Alhamdulillah 🤲
+                    </button>
+                </div>
+            </div>
+        </div><!-- Toast -->
+        <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden">
+            <div class="bg-emerald-700 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 toast"><span
+                    id="toast-icon">✓</span> <span id="toast-message">Berhasil!</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Default Configuration
+        const defaultConfig = {
+            org_name: 'Baitul Maal',
+            tagline: 'Amanah dalam Berbagi',
+            primary_color: '#064e3b',
+            secondary_color: '#d4af37',
+            text_color: '#ffffff'
+        };
+
+        let config = { ...defaultConfig };
+        let donations = [];
+        let quranProgress = { juz: 1, surah: 1 };
+        let ngajiReminder = null;
+        let selectedPaymentType = 'maal';
+        let selectedBank = null;
+        let currentPaymentCategory = 'zakat';
+
+        // Surah List
+        const surahList = [
+            { no: 1, name: 'Al-Fatihah', ayat: 7, juz: 1 },
+            { no: 2, name: 'Al-Baqarah', ayat: 286, juz: 1 },
+            { no: 3, name: 'Ali Imran', ayat: 200, juz: 3 },
+            { no: 4, name: 'An-Nisa', ayat: 176, juz: 4 },
+            { no: 5, name: 'Al-Maidah', ayat: 120, juz: 6 },
+            { no: 6, name: 'Al-An\'am', ayat: 165, juz: 7 },
+            { no: 7, name: 'Al-A\'raf', ayat: 206, juz: 8 },
+            { no: 8, name: 'Al-Anfal', ayat: 75, juz: 9 },
+            { no: 9, name: 'At-Taubah', ayat: 129, juz: 10 },
+            { no: 10, name: 'Yunus', ayat: 109, juz: 11 },
+            { no: 11, name: 'Hud', ayat: 123, juz: 11 },
+            { no: 12, name: 'Yusuf', ayat: 111, juz: 12 },
+            { no: 13, name: 'Ar-Ra\'d', ayat: 43, juz: 13 },
+            { no: 14, name: 'Ibrahim', ayat: 52, juz: 13 },
+            { no: 15, name: 'Al-Hijr', ayat: 99, juz: 14 },
+            { no: 16, name: 'An-Nahl', ayat: 128, juz: 14 },
+            { no: 17, name: 'Al-Isra', ayat: 111, juz: 15 },
+            { no: 18, name: 'Al-Kahf', ayat: 110, juz: 15 },
+            { no: 19, name: 'Maryam', ayat: 98, juz: 16 },
+            { no: 20, name: 'Ta-Ha', ayat: 135, juz: 16 },
+            { no: 21, name: 'Al-Anbiya', ayat: 112, juz: 17 },
+            { no: 22, name: 'Al-Hajj', ayat: 78, juz: 17 },
+            { no: 23, name: 'Al-Mu\'minun', ayat: 118, juz: 18 },
+            { no: 24, name: 'An-Nur', ayat: 64, juz: 18 },
+            { no: 25, name: 'Al-Furqan', ayat: 77, juz: 18 },
+            { no: 26, name: 'Asy-Syu\'ara', ayat: 227, juz: 19 },
+            { no: 27, name: 'An-Naml', ayat: 93, juz: 19 },
+            { no: 28, name: 'Al-Qasas', ayat: 88, juz: 20 },
+            { no: 29, name: 'Al-Ankabut', ayat: 69, juz: 20 },
+            { no: 30, name: 'Ar-Rum', ayat: 60, juz: 21 },
+            { no: 36, name: 'Ya-Sin', ayat: 83, juz: 22 },
+            { no: 55, name: 'Ar-Rahman', ayat: 78, juz: 27 },
+            { no: 56, name: 'Al-Waqi\'ah', ayat: 96, juz: 27 },
+            { no: 67, name: 'Al-Mulk', ayat: 30, juz: 29 },
+            { no: 78, name: 'An-Naba', ayat: 40, juz: 30 },
+            { no: 112, name: 'Al-Ikhlas', ayat: 4, juz: 30 },
+            { no: 113, name: 'Al-Falaq', ayat: 5, juz: 30 },
+            { no: 114, name: 'An-Nas', ayat: 6, juz: 30 }
+        ];
+
+        // Doa Collection
+        const doaCollection = {
+            pagi: {
+                title: '🌅 Doa Pagi Hari',
+                items: [
+                    {
+                        arabic: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ',
+                        latin: 'Ashbahnaa wa ashbahal mulku lillaah',
+                        arti: 'Kami telah memasuki waktu pagi dan kerajaan hanya milik Allah'
+                    },
+                    {
+                        arabic: 'اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ',
+                        latin: 'Allahumma bika ashbahnaa wa bika amsainaa wa bika nahyaa wa bika namuutu wa ilaikan nusyuur',
+                        arti: 'Ya Allah, dengan rahmat-Mu kami memasuki waktu pagi dan petang, dengan kehendak-Mu kami hidup dan mati, dan kepada-Mu kami akan kembali'
+                    }
+                ]
+            },
+            petang: {
+                title: '🌆 Doa Petang Hari',
+                items: [
+                    {
+                        arabic: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ',
+                        latin: 'Amsainaa wa amsal mulku lillaah',
+                        arti: 'Kami telah memasuki waktu petang dan kerajaan hanya milik Allah'
+                    },
+                    {
+                        arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذِهِ اللَّيْلَةِ',
+                        latin: 'Allahumma inni as-aluka khaira haadzihil lailah',
+                        arti: 'Ya Allah, aku memohon kebaikan malam ini'
+                    }
+                ]
+            },
+            tidur: {
+                title: '🌙 Doa Sebelum Tidur',
+                items: [
+                    {
+                        arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+                        latin: 'Bismikallaahumma amuutu wa ahyaa',
+                        arti: 'Dengan nama-Mu ya Allah aku mati dan hidup'
+                    },
+                    {
+                        arabic: 'اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ',
+                        latin: 'Allaahumma qinii \'adzaabaka yauma tab\'atsu \'ibaadaka',
+                        arti: 'Ya Allah, lindungilah aku dari azab-Mu pada hari Engkau membangkitkan hamba-hamba-Mu'
+                    }
+                ]
+            },
+            makan: {
+                title: '🍽️ Doa Makan',
+                items: [
+                    {
+                        arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
+                        latin: 'Bismillaahi wa \'alaa barakatillaah',
+                        arti: 'Dengan nama Allah dan dengan berkah Allah'
+                    },
+                    {
+                        arabic: 'اَلْحَمْدُ لِلَّهِ الَّذِى أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ',
+                        latin: 'Alhamdulillaahilladzi ath\'amanaa wa saqaanaa wa ja\'alanaa muslimiin',
+                        arti: 'Segala puji bagi Allah yang telah memberi kami makan dan minum serta menjadikan kami muslim'
+                    }
+                ]
+            }
+        };
+
+        // Slider content
+        const slides = [
+            {
+                label: '📖 Hadits Hari Ini',
+                content: '"Sedekah tidak akan mengurangi harta."',
+                source: '(HR. Muslim)'
+            },
+            {
+                label: '🕌 Info Zakat',
+                content: 'Zakat maal wajib bagi harta yang mencapai nisab setara 85 gram emas.',
+                source: ''
+            },
+            {
+                label: '💝 Keutamaan Infak',
+                content: '"Harta tidak akan berkurang dengan sedekah."',
+                source: '(HR. Tirmidzi)'
+            }
+        ];
+
+        let currentSlide = 0;
+
+        // Initialize
+        async function init() {
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
+            setInterval(autoSlide, 5000);
+            generateSurahList();
+
+            // Initialize Element SDK
+            if (window.elementSdk) {
+                window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (newConfig) => {
+                        config = { ...config, ...newConfig };
+                        applyConfig();
+                    },
+                    mapToCapabilities: (cfg) => ({
+                        recolorables: [],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (cfg) => new Map([
+                        ['org_name', cfg.org_name || defaultConfig.org_name],
+                        ['tagline', cfg.tagline || defaultConfig.tagline]
+                    ])
+                });
+            }
+
+            // Initialize Data SDK
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init({
+                    onDataChanged: (data) => {
+                        handleDataChange(data);
+                    }
+                });
+                if (!result.isOk) {
+                    console.error('Failed to initialize data SDK');
+                }
+            }
+        }
+
+        function handleDataChange(data) {
+            donations = data.filter(d => d.type === 'donation');
+            const progressData = data.find(d => d.type === 'quran_progress');
+            const reminderData = data.find(d => d.type === 'ngaji_reminder');
+
+            if (progressData) {
+                quranProgress = { juz: progressData.quran_progress || 1, surah: 1 };
+                updateProgressUI();
+            }
+
+            if (reminderData) {
+                ngajiReminder = reminderData.ngaji_reminder;
+                document.getElementById('reminder-time').textContent = ngajiReminder || 'Belum diatur';
+            }
+
+            renderHistoryList();
+        }
+
+        function applyConfig() {
+            document.getElementById('org-name').textContent = config.org_name || defaultConfig.org_name;
+            document.getElementById('tagline').textContent = config.tagline || defaultConfig.tagline;
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
+
+            // Approximate Hijri date (simplified calculation)
+            const hijriYear = Math.floor((now.getFullYear() - 622) * 33 / 32);
+            document.getElementById('hijri-date').textContent = `${hijriYear} H`;
+
+            updateNextPrayer();
+        }
+
+        function updateNextPrayer() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const currentMinutes = hour * 60 + minute;
+
+            const prayers = [
+                { name: 'Subuh', time: 4 * 60 + 30 },
+                { name: 'Dzuhur', time: 12 * 60 },
+                { name: 'Ashar', time: 15 * 60 + 15 },
+                { name: 'Maghrib', time: 18 * 60 },
+                { name: 'Isya', time: 19 * 60 + 15 }
+            ];
+
+            let nextPrayer = prayers[0];
+            let timeDiff = prayers[0].time + 24 * 60 - currentMinutes;
+
+            for (const prayer of prayers) {
+                if (prayer.time > currentMinutes) {
+                    nextPrayer = prayer;
+                    timeDiff = prayer.time - currentMinutes;
+                    break;
+                }
+            }
+
+            const hours = Math.floor(timeDiff / 60);
+            const mins = timeDiff % 60;
+
+            document.getElementById('next-prayer').innerHTML = `
+        <p class="text-emerald-300 text-xs">Sholat berikutnya</p>
+        <p class="text-amber-400 font-semibold">${nextPrayer.name} dalam ${hours} jam ${mins} menit</p>
+      `;
+        }
+
+        function autoSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateSlider();
+        }
+
+        function changeSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const slide = slides[currentSlide];
+            document.getElementById('slider-content').innerHTML = `
+        <div class="slide active">
+          <p class="text-amber-400 text-sm font-medium mb-1">${slide.label}</p>
+          <p class="text-white text-sm leading-relaxed">${slide.content} <span class="text-emerald-300 text-xs">${slide.source}</span></p>
+        </div>
+      `;
+
+            document.querySelectorAll('.slide-dot').forEach((dot, i) => {
+                dot.className = `slide-dot w-2 h-2 rounded-full ${i === currentSlide ? 'bg-amber-400 opacity-100' : 'bg-white/40'}`;
+            });
+        }
+
+        // Payment Functions
+        function openPaymentModal(category) {
+            currentPaymentCategory = category;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            document.getElementById('payment-title').textContent = category === 'zakat' ? 'Bayar Zakat' : 'Infak/Sedekah';
+
+            const tabsContainer = document.getElementById('payment-tabs');
+            if (category === 'zakat') {
+                tabsContainer.innerHTML = `
+          <button onclick="selectPaymentType('maal')" class="payment-tab tab-active px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">Zakat Maal</button>
+          <button onclick="selectPaymentType('fitrah')" class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Zakat Fitrah</button>
+          <button onclick="selectPaymentType('profesi')" class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Zakat Profesi</button>
+        `;
+                selectedPaymentType = 'maal';
+            } else {
+                tabsContainer.innerHTML = `
+          <button onclick="selectPaymentType('jariyah')" class="payment-tab tab-active px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">Sedekah Jariyah</button>
+          <button onclick="selectPaymentType('kemanusiaan')" class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Kemanusiaan</button>
+          <button onclick="selectPaymentType('umum')" class="payment-tab px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white whitespace-nowrap">Infak Umum</button>
+        `;
+                selectedPaymentType = 'jariyah';
+            }
+
+            selectedBank = null;
+            document.getElementById('amount-input').value = '';
+            document.getElementById('qris-display').classList.add('hidden');
+            document.getElementById('show-qris-btn').classList.remove('hidden');
+            document.getElementById('show-qris-btn').disabled = true;
+            resetBankSelection();
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        function selectPaymentType(type) {
+            selectedPaymentType = type;
+            document.querySelectorAll('.payment-tab').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('bg-white/10', 'text-white');
+            });
+            event.target.classList.add('tab-active');
+            event.target.classList.remove('bg-white/10', 'text-white');
+            checkPaymentReady();
+        }
+
+        function setAmount(amount) {
+            document.getElementById('amount-input').value = amount;
+            checkPaymentReady();
+        }
+
+        function selectBank(bank) {
+            selectedBank = bank;
+            document.querySelectorAll('.bank-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400');
+                btn.classList.add('border-transparent');
+            });
+            event.currentTarget.classList.remove('border-transparent');
+            event.currentTarget.classList.add('border-amber-400');
+            checkPaymentReady();
+        }
+
+        function resetBankSelection() {
+            document.querySelectorAll('.bank-btn').forEach(btn => {
+                btn.classList.remove('border-amber-400');
+                btn.classList.add('border-transparent');
+            });
+        }
+
+        function checkPaymentReady() {
+            const amount = document.getElementById('amount-input').value;
+            const btn = document.getElementById('show-qris-btn');
+            btn.disabled = !(amount && selectedBank);
+        }
+
+        function showQRIS() {
+            const amount = document.getElementById('amount-input').value;
+            if (!amount || !selectedBank) return;
+
+            const bankLabels = { bsi: 'BSI', mandiri: 'MSB', bni: 'BNI' };
+            document.getElementById('qris-bank').textContent = bankLabels[selectedBank];
+            document.getElementById('qris-amount').textContent = `Rp ${parseInt(amount).toLocaleString('id-ID')}`;
+
+            document.getElementById('qris-display').classList.remove('hidden');
+            document.getElementById('show-qris-btn').classList.add('hidden');
+        }
+
+        async function confirmPayment() {
+            const amount = parseInt(document.getElementById('amount-input').value);
+
+            if (donations.length >= 999) {
+                showToast('Batas maksimal tercapai', '⚠️');
+                return;
+            }
+
+            const donationData = {
+                type: 'donation',
+                category: currentPaymentCategory,
+                amount: amount,
+                bank: selectedBank,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            if (window.dataSdk) {
+                const result = await window.dataSdk.create(donationData);
+                if (result.isOk) {
+                    showToast('Jazakallahu khairan! Donasi tercatat.', '✓');
+                    closePaymentModal();
+                } else {
+                    showToast('Gagal menyimpan donasi', '✗');
+                }
+            } else {
+                donations.push({ ...donationData, __backendId: Date.now().toString() });
+                renderHistoryList();
+                showToast('Jazakallahu khairan! Donasi tercatat.', '✓');
+                closePaymentModal();
+            }
+        }
+
+        // Quran Functions
+        function generateSurahList() {
+            const container = document.getElementById('surah-list');
+            container.innerHTML = surahList.map(surah => `
+        <div onclick="markSurahRead(${surah.no}, ${surah.juz})" 
+          class="surah-item flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${surah.no <= quranProgress.surah ? 'bg-amber-400/20' : ''}" data-surah="${surah.no}">
+          <div class="w-10 h-10 rounded-full ${surah.no <= quranProgress.surah ? 'bg-amber-400' : 'bg-white/10'} flex items-center justify-center">
+            <span class="${surah.no <= quranProgress.surah ? 'text-emerald-900' : 'text-white'} font-bold text-sm">${surah.no}</span>
+          </div>
+          <div class="flex-1">
+            <p class="text-white font-medium">${surah.name}</p>
+            <p class="text-emerald-300 text-xs">${surah.ayat} Ayat • Juz ${surah.juz}</p>
+          </div>
+          ${surah.no <= quranProgress.surah ? '<span class="text-amber-400">✓</span>' : ''}
+        </div>
+      `).join('');
+        }
+
+        async function markSurahRead(surahNo, juzNo) {
+            if (surahNo > quranProgress.surah) {
+                quranProgress.surah = surahNo;
+                quranProgress.juz = juzNo;
+
+                if (window.dataSdk) {
+                    const result = await window.dataSdk.create({
+                        type: 'quran_progress',
+                        quran_progress: juzNo,
+                        category: '',
+                        amount: 0,
+                        bank: '',
+                        status: '',
+                        createdAt: new Date().toISOString(),
+                        ngaji_reminder: ''
+                    });
+                }
+
+                generateSurahList();
+                updateProgressUI();
+
+                if (juzNo >= 30 && surahNo >= 114) {
+                    showKhatamCelebration();
+                } else {
+                    showToast(`Alhamdulillah! Surah ${surahList.find(s => s.no === surahNo)?.name} selesai`, '📖');
+                }
+            }
+        }
+
+        function updateProgressUI() {
+            const percent = Math.round((quranProgress.juz / 30) * 100);
+            document.getElementById('progress-percent').textContent = `${percent}%`;
+            document.getElementById('current-juz').textContent = quranProgress.juz;
+
+            const currentSurah = surahList.find(s => s.juz === quranProgress.juz);
+            document.getElementById('current-surah').textContent = currentSurah?.name || 'Al-Fatihah';
+
+            const circle = document.getElementById('progress-circle');
+            const offset = 251.2 - (251.2 * percent / 100);
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function openQuranModal() {
+            document.getElementById('quran-modal').classList.remove('hidden');
+            generateSurahList();
+        }
+
+        function closeQuranModal() {
+            document.getElementById('quran-modal').classList.add('hidden');
+        }
+
+        function showKhatamCelebration() {
+            document.getElementById('khatam-modal').classList.remove('hidden');
+        }
+
+        function closeKhatamModal() {
+            document.getElementById('khatam-modal').classList.add('hidden');
+            // Reset progress for next khatam
+            quranProgress = { juz: 1, surah: 1 };
+            updateProgressUI();
+            generateSurahList();
+        }
+
+        // Doa Functions
+        function openDoaModal(type) {
+            const doa = doaCollection[type];
+            document.getElementById('doa-title').textContent = doa.title;
+            document.getElementById('doa-content').innerHTML = doa.items.map(item => `
+        <div class="bg-white/10 rounded-xl p-4">
+          <p class="text-amber-400 font-amiri text-xl text-right leading-loose mb-3">${item.arabic}</p>
+          <p class="text-emerald-200 text-sm italic mb-2">${item.latin}</p>
+          <p class="text-white text-sm">${item.arti}</p>
+        </div>
+      `).join('');
+            document.getElementById('doa-modal').classList.remove('hidden');
+        }
+
+        function closeDoaModal() {
+            document.getElementById('doa-modal').classList.add('hidden');
+        }
+
+        // Reminder Functions
+        function openReminderModal() {
+            document.getElementById('reminder-modal').classList.remove('hidden');
+            if (ngajiReminder) {
+                document.getElementById('reminder-input').value = ngajiReminder;
+            }
+        }
+
+        function closeReminderModal() {
+            document.getElementById('reminder-modal').classList.add('hidden');
+        }
+
+        async function saveReminder() {
+            const time = document.getElementById('reminder-input').value;
+            if (!time) {
+                showToast('Pilih waktu pengingat', '⚠️');
+                return;
+            }
+
+            ngajiReminder = time;
+            document.getElementById('reminder-time').textContent = time;
+
+            if (window.dataSdk) {
+                await window.dataSdk.create({
+                    type: 'ngaji_reminder',
+                    ngaji_reminder: time,
+                    category: '',
+                    amount: 0,
+                    bank: '',
+                    status: '',
+                    createdAt: new Date().toISOString(),
+                    quran_progress: 0
+                });
+            }
+
+            showToast(`Pengingat ngaji diatur pukul ${time}`, '⏰');
+            closeReminderModal();
+        }
+
+        // History Functions
+        function openHistoryModal() {
+            document.getElementById('history-modal').classList.remove('hidden');
+            renderHistoryList();
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list');
+
+            if (donations.length === 0) {
+                container.innerHTML = '<p class="text-center text-emerald-300 py-8">Belum ada riwayat donasi</p>';
+                return;
+            }
+
+            container.innerHTML = donations.map(d => {
+                const date = new Date(d.createdAt);
+                const bankLabels = { bsi: 'BSI', mandiri: 'Mandiri Syariah', bni: 'BNI Syariah' };
+                const categoryLabels = { zakat: 'Zakat', infak: 'Infak/Sedekah' };
+
+                return `
+          <div class="bg-white/10 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-amber-400 font-semibold">${categoryLabels[d.category] || d.category}</span>
+              <span class="text-emerald-300 text-xs">${date.toLocaleDateString('id-ID')}</span>
+            </div>
+            <p class="text-white font-bold text-lg">Rp ${d.amount?.toLocaleString('id-ID') || 0}</p>
+            <p class="text-emerald-300 text-sm">${bankLabels[d.bank] || d.bank}</p>
+          </div>
+        `;
+            }).join('');
+        }
+
+        // Utility Functions
+        function scrollToTop() {
+            document.getElementById('app').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showToast(message, icon = '✓') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            document.getElementById('toast-icon').textContent = icon;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        // Initialize app
+        init();
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9c69f767a4d8e787',t:'MTc2OTg3MDQ1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

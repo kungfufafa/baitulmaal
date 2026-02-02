@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 164 86% 16%;
+        /* emerald-900: #064e3b -> HSL approx 164 86% 16% */
+        --foreground: 0 0% 100%;
+
+        --card: 164 86% 16%;
+        /* Same as background for now, or slight variation */
+        --card-foreground: 0 0% 100%;
+
+        --popover: 164 86% 16%;
+        --popover-foreground: 0 0% 100%;
+
+        --primary: 45 93% 47%;
+        /* amber-400: #fbbf24 -> HSL 45 93% 56% adjusted */
+        --primary-foreground: 164 86% 16%;
+
+        --secondary: 160 84% 39%;
+        /* emerald-500 or similar */
+        --secondary-foreground: 0 0% 100%;
+
+        --muted: 164 86% 12%;
+        --muted-foreground: 164 40% 70%;
+
+        --accent: 164 86% 14%;
+        --accent-foreground: 0 0% 100%;
+
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 164 86% 20%;
+        --input: 164 86% 20%;
+        --ring: 45 93% 47%;
+
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 164 86% 16%;
+        --foreground: 0 0% 100%;
+        --card: 164 86% 16%;
+        --card-foreground: 0 0% 100%;
+        --popover: 164 86% 16%;
+        --popover-foreground: 0 0% 100%;
+        --primary: 45 93% 47%;
+        --primary-foreground: 164 86% 16%;
+        --secondary: 160 84% 39%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 164 86% 12%;
+        --muted-foreground: 164 40% 70%;
+        --accent: 164 86% 14%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 164 86% 20%;
+        --input: 164 86% 20%;
+        --ring: 45 93% 47%;
+    }
+}
