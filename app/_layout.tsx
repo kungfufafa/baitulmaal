@@ -1,7 +1,9 @@
 import { DonationProvider } from '@/contexts/DonationContext';
 import { PaymentSheetProvider } from '@/contexts/PaymentSheetContext';
+import { QuranProvider } from '@/contexts/QuranContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { PortalHost } from '@rn-primitives/portal';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -53,21 +55,25 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <DonationProvider>
-        <PaymentSheetProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <View className="flex-1 bg-emerald-900">
-              <BackgroundPattern />
-              <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </Stack>
-              <StatusBar style="light" />
-              <PortalHost />
-              <GlobalPaymentSheet />
-            </View>
-          </ThemeProvider>
-        </PaymentSheetProvider>
-      </DonationProvider>
+      <BottomSheetModalProvider>
+        <DonationProvider>
+          <PaymentSheetProvider>
+            <QuranProvider>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <View className="flex-1 bg-emerald-900">
+                  <BackgroundPattern />
+                  <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  </Stack>
+                  <StatusBar style="light" />
+                  <PortalHost />
+                  <GlobalPaymentSheet />
+                </View>
+              </ThemeProvider>
+            </QuranProvider>
+          </PaymentSheetProvider>
+        </DonationProvider>
+      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 }

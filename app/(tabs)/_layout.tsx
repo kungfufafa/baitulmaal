@@ -54,6 +54,12 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
+                name="quran/[surah]"
+                options={{
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
                 name="donasi"
                 options={{
                     title: 'Donasi',

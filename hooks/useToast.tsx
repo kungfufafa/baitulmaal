@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 
@@ -21,9 +21,23 @@ export function useToast() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-50)).current;
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const showToast = useCallback((message: string, icon: string = '✓', options?: ToastOptions) => {
     const duration = options?.duration ?? 3000;
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
 
     setToast({ visible: true, message, icon });
     fadeAnim.setValue(0);
@@ -44,7 +58,7 @@ export function useToast() {
       }),
     ]).start();
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -58,11 +72,16 @@ export function useToast() {
         }),
       ]).start(() => {
         setToast((prev) => ({ ...prev, visible: false }));
+        timeoutRef.current = null;
       });
     }, duration);
   }, [fadeAnim, slideAnim]);
 
   const hideToast = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: -50, duration: 200, useNativeDriver: true }),
@@ -78,10 +97,14 @@ export function useToast() {
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
         }}
-        className="bg-emerald-700 px-6 py-3 rounded-xl flex flex-row items-center gap-2 shadow-lg"
       >
-        <Text className="text-white">{toast.icon}</Text>
-        <Text className="text-white font-poppins">{toast.message}</Text>
+        <View
+          style={{ backgroundColor: '#111827' }}
+          className="px-6 py-3 rounded-xl flex flex-row items-center gap-2 shadow-lg"
+        >
+          <Text className="text-white">{toast.icon}</Text>
+          <Text className="text-white font-poppins">{toast.message}</Text>
+        </View>
       </Animated.View>
     </View>
   ) : null;

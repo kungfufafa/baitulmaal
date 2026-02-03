@@ -32,14 +32,15 @@ export function formatHijriDate(date: Date): string {
   }
 }
 
-export function getNextPrayer(): { prayer: PrayerTime; hours: number; minutes: number } {
+export function getNextPrayer(prayerList: PrayerTime[] = prayers): { prayer: PrayerTime; hours: number; minutes: number } {
+  const list = prayerList.length > 0 ? prayerList : prayers;
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  let nextPrayer = prayers[0];
-  let timeDiff = prayers[0].hour * 60 + prayers[0].minute + 24 * 60 - currentMinutes;
+  let nextPrayer = list[0];
+  let timeDiff = list[0].hour * 60 + list[0].minute + 24 * 60 - currentMinutes;
 
-  for (const prayer of prayers) {
+  for (const prayer of list) {
     const prayerMinutes = prayer.hour * 60 + prayer.minute;
     if (prayerMinutes > currentMinutes) {
       nextPrayer = prayer;

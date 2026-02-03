@@ -11,8 +11,8 @@ import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { BankType, PaymentCategory, PaymentType } from '@/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Platform, Pressable, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Platform, Pressable, View } from 'react-native';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -66,6 +66,10 @@ export default function PaymentModal({
 
   const snapPoints = useMemo(() => ['60%', '90%'], []);
 
+  useEffect(() => {
+    setSelectedPaymentType(category === 'zakat' ? 'maal' : 'jariyah');
+  }, [category]);
+
   const formatNumber = (num: string) => {
     return num.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
@@ -76,56 +80,11 @@ export default function PaymentModal({
 
   const isReady = getRawValue(amount) > 0 && selectedBank;
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastIcon, setToastIcon] = useState('ⓘ');
-
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(-50)).current;
-
-  const displayToast = (message: string, icon: string = 'ⓘ') => {
-    setToastMessage(message);
-    setToastIcon(icon);
-    setShowToast(true);
-
-    fadeAnim.setValue(0);
-    slideAnim.setValue(-50);
-
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-        easing: Easing.out(Easing.ease),
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-        easing: Easing.out(Easing.back(1.5)),
-      }),
-    ]).start();
-
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: -50,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setShowToast(false);
-      });
-    }, 3000);
-  };
-
   const handleProcessPayment = () => {
-    displayToast('Insya Allah Segera Hadir ✨', '🛠️');
+    if (!selectedBank || getRawValue(amount) <= 0) return;
+    onConfirm(getRawValue(amount), selectedPaymentType, selectedBank);
+    setAmount('');
+    setSelectedBank(null);
   };
 
   const handleAmountChange = (text: string) => {
@@ -147,26 +106,6 @@ export default function PaymentModal({
 
   return (
     <>
-      {showToast && (
-        <View className="absolute top-12 left-0 right-0 z-50 w-full items-center pointer-events-box-none">
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-            className="bg-white/95 px-6 py-4 rounded-2xl flex flex-row items-center gap-3 shadow-2xl border border-white/20"
-          >
-            <View className="w-10 h-10 bg-amber-100 rounded-full items-center justify-center">
-              <Text className="text-xl">{toastIcon}</Text>
-            </View>
-            <View>
-              <Text className="text-emerald-900 font-bold text-base">Mohon Maaf</Text>
-              <Text className="text-emerald-700 text-xs">{toastMessage}</Text>
-            </View>
-          </Animated.View>
-        </View>
-      )}
-
       <BottomSheet
         open={visible}
         onOpenChange={handleOpenChange}

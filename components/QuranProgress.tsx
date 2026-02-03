@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import { surahList } from '@/constants';
 import { QuranProgress as QuranProgressType } from '@/types';
 import React from 'react';
 import { View } from 'react-native';
@@ -23,11 +22,10 @@ export default React.memo(function QuranProgress({
   onPressReminder,
   reminderTime,
 }: QuranProgressProps) {
-  const percent = Math.round((progress.juz / 30) * 100);
+  const totalSurah = 114;
+  const percent = Math.round((progress.surah / totalSurah) * 100);
   const circumference = 2 * Math.PI * 40;
   const strokeDashoffset = circumference - (circumference * percent) / 100;
-
-  const currentSurah = surahList.find((s) => s.juz === progress.juz);
 
   return (
     <View className="px-4 py-4">
@@ -61,18 +59,18 @@ export default React.memo(function QuranProgress({
                 />
               </Svg>
               <View className="absolute inset-0 items-center justify-center">
-                <View className="text-center">
+              <View className="text-center">
                   <Text className="text-foreground font-bold text-lg">{percent}%</Text>
-                  <Text className="text-emerald-300 text-xs text-center">Khatam</Text>
+                  <Text className="text-emerald-300 text-xs text-center">Surah</Text>
                 </View>
               </View>
             </View>
             <View className="flex-1">
               <Text className="text-foreground font-medium mb-1">
-                Juz {progress.juz} / 30
+                Surah {progress.surah} / {totalSurah}
               </Text>
               <Text className="text-emerald-300 text-sm mb-3">
-                Surah: {currentSurah?.name || 'Al-Fatihah'}
+                Ayat terakhir: {progress.ayat}
               </Text>
               <Button
                 onPress={onPressContinue}

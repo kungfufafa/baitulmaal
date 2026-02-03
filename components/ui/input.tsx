@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { Text } from '@/components/ui/text';
 import * as React from 'react';
 import { TextInput, type TextInputProps, View } from 'react-native';
 
@@ -32,9 +33,9 @@ const InputWithLabel = React.forwardRef<React.ElementRef<typeof TextInput>, Inpu
       <View className={cn('gap-1.5', containerClassName)}>
         {label && (
           <View className="flex-row">
-            <View className={cn('text-sm font-medium text-foreground', labelClassName)}>
+            <Text className={cn('text-sm font-medium text-foreground', labelClassName)}>
               {label}
-            </View>
+            </Text>
           </View>
         )}
         <Input ref={ref} className={className} {...props} />

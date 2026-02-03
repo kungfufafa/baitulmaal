@@ -10,8 +10,9 @@ import PrayerTimes from '@/components/PrayerTimes';
 import QuranProgress from '@/components/QuranProgress';
 import { Text } from '@/components/ui/text';
 import { usePaymentSheet } from '@/contexts/PaymentSheetContext';
+import { useQuran } from '@/contexts/QuranContext';
 import { useToast } from '@/hooks/useToast';
-import { PaymentCategory, QuranProgress as QuranProgressType } from '@/types';
+import { PaymentCategory } from '@/types';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -21,9 +22,8 @@ export default function HomeScreen() {
     const router = useRouter();
     const { showToast, ToastComponent } = useToast();
     const { openPaymentSheet } = usePaymentSheet();
+    const { progress, reminderTime, setReminderTime } = useQuran();
 
-    const [quranProgress, setQuranProgress] = useState<QuranProgressType>({ juz: 1, surah: 1 });
-    const [ngajiReminder, setNgajiReminder] = useState<string | null>(null);
     const [khatamModalVisible, setKhatamModalVisible] = useState(false);
     const [reminderModalVisible, setReminderModalVisible] = useState(false);
 
@@ -33,12 +33,15 @@ export default function HomeScreen() {
 
     const handleCloseKhatamModal = () => {
         setKhatamModalVisible(false);
-        setQuranProgress({ juz: 1, surah: 1 });
     };
 
-    const handleSaveReminder = (time: string) => {
-        setNgajiReminder(time);
-        showToast(`Pengingat ngaji diatur pukul ${time}`, '⏰');
+    const handleSaveReminder = async (time: string) => {
+        const result = await setReminderTime(time);
+        if (result.ok) {
+            showToast(`Pengingat ngaji diatur pukul ${time}`, '⏰');
+        } else {
+            showToast(result.message ?? 'Gagal mengatur pengingat', '⚠️');
+        }
     };
 
     return (
@@ -105,14 +108,17 @@ export default function HomeScreen() {
                         <PrayerTimes />
 
                         <QuranProgress
-                            progress={quranProgress}
-                            onPressContinue={() => router.push('/(tabs)/quran')}
+                            progress={progress}
+                            onPressContinue={() => router.push({
+                                pathname: '/(tabs)/quran/[surah]',
+                                params: { surah: progress.surah, ayat: progress.ayat },
+                            })}
                             onPressReminder={() => setReminderModalVisible(true)}
-                            reminderTime={ngajiReminder}
+                            reminderTime={reminderTime}
                         />
 
                         <DoaGrid onOpenDoa={(type) => {
-                            router.push('/(tabs)/doa');
+                            router.push({ pathname: '/(tabs)/doa', params: { type } });
                         }} />
                     </View>
                 </ScrollView>
@@ -121,7 +127,7 @@ export default function HomeScreen() {
                     visible={reminderModalVisible}
                     onClose={() => setReminderModalVisible(false)}
                     onSave={handleSaveReminder}
-                    reminderTime={ngajiReminder}
+                    reminderTime={reminderTime}
                 />
 
                 <KhatamModal

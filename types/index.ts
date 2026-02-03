@@ -18,8 +18,8 @@ export interface Donation {
 }
 
 export interface QuranProgress {
-  juz: number;
   surah: number;
+  ayat: number;
 }
 
 export interface Surah {
@@ -33,6 +33,8 @@ export interface DoaItem {
   arabic: string;
   latin: string;
   arti: string;
+  title?: string;
+  tags?: string[];
 }
 
 export interface Doa {

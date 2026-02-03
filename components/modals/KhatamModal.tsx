@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useSharedValue,
@@ -36,7 +37,14 @@ export default function KhatamModal({ visible, onClose }: KhatamModalProps) {
         -1,
         true
       );
+    } else {
+      cancelAnimation(translateY);
+      translateY.value = 0;
     }
+    return () => {
+      cancelAnimation(translateY);
+      translateY.value = 0;
+    };
   }, [visible, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
