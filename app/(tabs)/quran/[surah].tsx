@@ -4,9 +4,52 @@ import { Text } from '@/components/ui/text';
 import { useQuran } from '@/contexts/QuranContext';
 import { useToast } from '@/hooks/useToast';
 import { Ayah, loadSurahDetail, SurahDetail } from '@/lib/quran';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, FlatList, Pressable, View } from 'react-native';
+
+interface AyahRowProps {
+  item: Ayah;
+  isActive: boolean;
+  onBookmark: (ayatNumber: number) => void;
+}
+
+const AyahRow = React.memo(function AyahRow({ item, isActive, onBookmark }: AyahRowProps) {
+  return (
+    <View className={`rounded-xl p-4 ${isActive ? 'bg-amber-400/20' : 'bg-white/10'}`}>
+      <View className="flex-row items-center justify-between mb-2">
+        <Text className="text-emerald-300 text-xs">Ayat {item.number}</Text>
+        <View className="flex-row items-center gap-2">
+          {isActive && <Text className="text-amber-400 text-xs">Terakhir dibaca</Text>}
+          <Pressable
+            onPress={() => onBookmark(item.number)}
+            className={`w-7 h-7 rounded-full items-center justify-center ${isActive ? 'bg-amber-400/20' : 'bg-white/10'
+              }`}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Tandai ayat ${item.number} sebagai terakhir dibaca`}
+          >
+            <MaterialCommunityIcons
+              name={isActive ? 'bookmark' : 'bookmark-outline'}
+              size={18}
+              color={isActive ? '#fbbf24' : 'rgba(255, 255, 255, 0.6)'}
+            />
+          </Pressable>
+        </View>
+      </View>
+      <Text className="text-amber-400 text-xl text-right leading-loose mb-3 font-amiri">
+        {item.arabic}
+      </Text>
+      {item.latin ? (
+        <Text className="text-emerald-200 text-sm italic mb-2 font-poppins">
+          {item.latin}
+        </Text>
+      ) : null}
+      <Text className="text-white text-sm font-poppins">{item.translation}</Text>
+    </View>
+  );
+});
 
 export default function QuranDetailScreen() {
   const router = useRouter();
@@ -23,6 +66,10 @@ export default function QuranDetailScreen() {
 
   const listRef = useRef<FlatList<Ayah>>(null);
 
+  const goBackToList = useCallback(() => {
+    router.replace('/(tabs)/quran');
+  }, [router]);
+
   const highlightedAyat = useMemo(() => {
     if (progress.surah !== surahNumber) return null;
     return progress.ayat;
@@ -32,6 +79,14 @@ export default function QuranDetailScreen() {
     if (!params.ayat) return;
     setProgress({ surah: surahNumber, ayat: initialAyat });
   }, [params.ayat, surahNumber, initialAyat, setProgress]);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      goBackToList();
+      return true;
+    });
+    return () => sub.remove();
+  }, [goBackToList]);
 
   useEffect(() => {
     let isMounted = true;
@@ -72,10 +127,20 @@ export default function QuranDetailScreen() {
     return () => clearTimeout(timeout);
   }, [detail, initialAyat, params.ayat]);
 
-  const handleSelectAyat = (ayatNumber: number) => {
+  const handleBookmarkAyat = useCallback((ayatNumber: number) => {
     setProgress({ surah: surahNumber, ayat: ayatNumber });
-    showToast(`Terakhir dibaca: Ayat ${ayatNumber}`, '📌');
-  };
+  }, [setProgress, surahNumber]);
+
+  const renderAyahItem = useCallback(({ item }: { item: Ayah }) => {
+    const isActive = item.number === highlightedAyat;
+    return (
+      <AyahRow
+        item={item}
+        isActive={isActive}
+        onBookmark={handleBookmarkAyat}
+      />
+    );
+  }, [handleBookmarkAyat, highlightedAyat]);
 
   const handleSaveReminder = async (time: string) => {
     const result = await setReminderTime(time);
@@ -90,7 +155,7 @@ export default function QuranDetailScreen() {
     <ScreenShell title="📖 Al-Quran" scrollable={false}>
       <View className="mb-3 flex-row items-center justify-between">
         <Pressable
-          onPress={() => router.back()}
+          onPress={goBackToList}
           className="px-3 py-2 rounded-md bg-white/10"
         >
           <Text className="text-white text-xs">Kembali</Text>
@@ -125,8 +190,9 @@ export default function QuranDetailScreen() {
             {highlightedAyat && (
               <Pressable
                 onPress={() => scrollToAyat(highlightedAyat)}
-                className="mt-3 px-3 py-2 rounded-md bg-white/10 self-start"
+                className="mt-3 px-3 py-2 rounded-full bg-white/10 self-start flex-row items-center gap-2"
               >
+                <MaterialCommunityIcons name="bookmark" size={14} color="#fbbf24" />
                 <Text className="text-white text-xs">
                   Lanjutkan dari Ayat {highlightedAyat}
                 </Text>
@@ -146,29 +212,12 @@ export default function QuranDetailScreen() {
               onScrollToIndexFailed={() => {
                 listRef.current?.scrollToOffset({ offset: 0, animated: true });
               }}
-              renderItem={({ item }) => {
-                const isActive = item.number === highlightedAyat;
-                return (
-                  <Pressable
-                    onPress={() => handleSelectAyat(item.number)}
-                    className={`rounded-xl p-4 ${isActive ? 'bg-amber-400/20' : 'bg-white/10'}`}
-                  >
-                    <View className="flex-row items-center justify-between mb-2">
-                      <Text className="text-emerald-300 text-xs">Ayat {item.number}</Text>
-                      {isActive && <Text className="text-amber-400 text-xs">Terakhir dibaca</Text>}
-                    </View>
-                    <Text className="text-amber-400 text-xl text-right leading-loose mb-3 font-amiri">
-                      {item.arabic}
-                    </Text>
-                    {item.latin ? (
-                      <Text className="text-emerald-200 text-sm italic mb-2 font-poppins">
-                        {item.latin}
-                      </Text>
-                    ) : null}
-                    <Text className="text-white text-sm font-poppins">{item.translation}</Text>
-                  </Pressable>
-                );
-              }}
+              initialNumToRender={8}
+              maxToRenderPerBatch={8}
+              windowSize={5}
+              removeClippedSubviews
+              updateCellsBatchingPeriod={50}
+              renderItem={renderAyahItem}
             />
           )}
         </>

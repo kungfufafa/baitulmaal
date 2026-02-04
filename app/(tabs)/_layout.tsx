@@ -2,6 +2,7 @@ import DonasiTabButton from '@/components/DonasiTabButton';
 import { Feather } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Platform, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function TabBarIcon({ name, label, focused }: { name: keyof typeof Feather.glyphMap; label: string; focused: boolean }) {
     return (
@@ -19,6 +20,11 @@ function TabBarIcon({ name, label, focused }: { name: keyof typeof Feather.glyph
 }
 
 export default function TabLayout() {
+    const insets = useSafeAreaInsets();
+    const baseHeight = Platform.OS === 'ios' ? 60 : 56;
+    const bottomInset = Math.max(insets.bottom, Platform.OS === 'ios' ? 28 : 12);
+    const tabBarHeight = baseHeight + bottomInset;
+
     return (
         <Tabs
             screenOptions={{
@@ -26,8 +32,8 @@ export default function TabLayout() {
                 tabBarStyle: {
                     backgroundColor: '#064e3b',
                     borderTopColor: 'rgba(4, 120, 87, 0.5)',
-                    height: Platform.OS === 'ios' ? 88 : 68,
-                    paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+                    height: tabBarHeight,
+                    paddingBottom: bottomInset,
                     paddingTop: 8,
                     position: 'absolute',
                     bottom: 0,
@@ -57,6 +63,7 @@ export default function TabLayout() {
                 name="quran/[surah]"
                 options={{
                     href: null,
+                    tabBarStyle: { display: 'none' },
                 }}
             />
             <Tabs.Screen

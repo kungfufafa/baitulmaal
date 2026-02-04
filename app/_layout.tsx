@@ -28,6 +28,7 @@ import BackgroundPattern from '@/components/BackgroundPattern';
 import GlobalPaymentSheet from '@/components/GlobalPaymentSheet';
 import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -60,15 +61,17 @@ export default function RootLayout() {
           <PaymentSheetProvider>
             <QuranProvider>
               <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <View className="flex-1 bg-emerald-900">
-                  <BackgroundPattern />
-                  <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  </Stack>
-                  <StatusBar style="light" />
-                  <PortalHost />
-                  <GlobalPaymentSheet />
-                </View>
+                <SafeAreaProvider>
+                  <View className="flex-1 bg-emerald-900">
+                    <BackgroundPattern />
+                    <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
+                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    </Stack>
+                    <StatusBar style="light" />
+                    <PortalHost />
+                    <GlobalPaymentSheet />
+                  </View>
+                </SafeAreaProvider>
               </ThemeProvider>
             </QuranProvider>
           </PaymentSheetProvider>
