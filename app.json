@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mekayastudio.baitulmaal"
+      "bundleIdentifier": "com.mekayastudio.baitulmaal",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +32,7 @@
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.mekayastudio.baitulmaal",
-      "versionCode": 3
+      "versionCode": 4
     },
     "web": {
       "output": "static",
