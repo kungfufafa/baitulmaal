@@ -37,7 +37,7 @@ export default function HistoryScreen() {
                                     {formatCurrency(donation.amount)}
                                 </Text>
                                 <Text className="text-emerald-300 text-sm font-poppins">
-                                    {bankLabels[donation.bank]}
+                                    {donation.bank ? bankLabels[donation.bank] : 'Metode Lain'}
                                 </Text>
                             </View>
                         );

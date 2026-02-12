@@ -15,6 +15,8 @@ export const initNotifications = () => {
       shouldShowAlert: true,
       shouldPlaySound: true,
       shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
     }),
   });
 };
@@ -80,7 +82,10 @@ export async function schedulePrayerNotifications(prayers: PrayerTime[], city: s
         sound: 'default',
         ...(Platform.OS === 'android' ? { channelId: ANDROID_CHANNEL_ID } : null),
       },
-      trigger: target.triggerDate,
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: target.triggerDate,
+      },
     });
     scheduledIds.push(id);
   }
