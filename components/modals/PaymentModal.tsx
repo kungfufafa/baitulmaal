@@ -9,16 +9,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
-import { BankType, PaymentCategory, PaymentType } from '@/types';
+import { PaymentCategory, PaymentType, PaymentMethod } from '@/types';
+import { MOCK_PAYMENT_METHODS } from '@/lib/mock-data';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, View, Image } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
+import { useToast } from '@/hooks/useToast';
 
 interface PaymentModalProps {
   visible: boolean;
   onClose: () => void;
   category: PaymentCategory;
-  onConfirm: (amount: number, paymentType: PaymentType, bank: BankType) => void;
+  onConfirm: (amount: number, paymentType: PaymentType, method: PaymentMethod) => void;
   onModalHide?: () => void;
 }
 
@@ -33,27 +37,15 @@ export default function PaymentModal({
     category === 'zakat' ? 'maal' : 'jariyah'
   );
   const [amount, setAmount] = useState('');
-  const [selectedBank, setSelectedBank] = useState<BankType | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [proofUploaded, setProofUploaded] = useState(false);
+  const { showToast } = useToast();
 
   const zakatTypes: PaymentType[] = ['maal', 'fitrah', 'profesi'];
   const infakTypes: PaymentType[] = ['jariyah', 'kemanusiaan', 'umum'];
   const paymentTypes = category === 'zakat' ? zakatTypes : infakTypes;
 
-  const banks: BankType[] = ['bsi', 'mandiri', 'bni'];
-
   const quickAmounts = [50000, 100000, 250000, 500000, 1000000];
-
-  const bankNames: Record<BankType, string> = {
-    bsi: 'Bank Syariah Indonesia',
-    mandiri: 'Mandiri Syariah',
-    bni: 'BNI Syariah',
-  };
-
-  const bankIcons: Record<BankType, string> = {
-    bsi: 'BSI',
-    mandiri: 'MSB',
-    bni: 'BNI',
-  };
 
   const paymentTypeLabels: Record<PaymentType, string> = {
     maal: 'Zakat Maal',
@@ -78,13 +70,14 @@ export default function PaymentModal({
     return parseInt(formatted.replace(/\./g, '') || '0', 10);
   };
 
-  const isReady = getRawValue(amount) > 0 && selectedBank;
+  const isReady = getRawValue(amount) > 0 && selectedMethod;
 
   const handleProcessPayment = () => {
-    if (!selectedBank || getRawValue(amount) <= 0) return;
-    onConfirm(getRawValue(amount), selectedPaymentType, selectedBank);
+    if (!selectedMethod || getRawValue(amount) <= 0) return;
+    onConfirm(getRawValue(amount), selectedPaymentType, selectedMethod);
     setAmount('');
-    setSelectedBank(null);
+    setSelectedMethod(null);
+    setProofUploaded(false);
   };
 
   const handleAmountChange = (text: string) => {
@@ -93,7 +86,8 @@ export default function PaymentModal({
 
   const handleClose = () => {
     setAmount('');
-    setSelectedBank(null);
+    setSelectedMethod(null);
+    setProofUploaded(false);
     onClose();
     onModalHide?.();
   };
@@ -102,6 +96,16 @@ export default function PaymentModal({
     if (!open) {
       handleClose();
     }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    await Clipboard.setStringAsync(text);
+    showToast('Nomor rekening disalin', '📋');
+  };
+
+  const handleUploadProof = () => {
+    setProofUploaded(true);
+    showToast('Bukti transfer berhasil diunggah', '✅');
   };
 
   return (
@@ -148,8 +152,8 @@ export default function PaymentModal({
               })}
             </View>
 
-            <View className="mb-4">
-              <Text className="text-emerald-300 text-sm mb-2">Nominal</Text>
+            <View className="mb-6">
+              <Text className="text-emerald-300 text-sm mb-2 font-poppins">Nominal Donasi</Text>
               <View className="relative">
                 <Text className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground font-medium z-10">
                   Rp
@@ -159,18 +163,18 @@ export default function PaymentModal({
                   onChangeText={handleAmountChange}
                   placeholder="0"
                   keyboardType="numeric"
-                  className="w-full bg-white/10 border-white/20 pl-12 pr-4 text-foreground text-lg"
+                  className="w-full bg-white/10 border-white/20 pl-12 pr-4 text-foreground text-lg h-14 rounded-xl"
                   placeholderTextColor="rgba(255,255,255,0.5)"
                 />
               </View>
-              <View className="flex flex-row gap-2 mt-2 flex-wrap">
+              <View className="flex flex-row gap-2 mt-3 flex-wrap">
                 {quickAmounts.map((quickAmount) => (
                   <Pressable
                     key={quickAmount}
                     onPress={() => setAmount(formatNumber(quickAmount.toString()))}
-                    className="px-3 py-1 bg-white/10 rounded-lg active:bg-white/20 web:hover:bg-white/20"
+                    className="px-3 py-1.5 bg-white/10 rounded-lg active:bg-white/20 border border-white/5"
                   >
-                    <Text className="text-foreground text-xs">
+                    <Text className="text-foreground text-xs font-poppins">
                       {quickAmount >= 1000000
                         ? `${quickAmount / 1000000}jt`
                         : `${quickAmount / 1000}rb`}
@@ -180,51 +184,110 @@ export default function PaymentModal({
               </View>
             </View>
 
-            <View>
-              <Text className="text-emerald-300 text-sm mb-2">
-                Pilih Bank (QRIS)
+            <View className="mb-6">
+              <Text className="text-emerald-300 text-sm mb-3 font-poppins">
+                Metode Pembayaran
               </Text>
-              <View className="gap-2">
-                {banks.map((bank) => (
+              <View className="gap-3">
+                {MOCK_PAYMENT_METHODS.map((method) => {
+                    const isSelected = selectedMethod?.id === method.id;
+                    return (
                   <Pressable
-                    key={bank}
-                    onPress={() => setSelectedBank(bank)}
+                    key={method.id}
+                    onPress={() => setSelectedMethod(method)}
                     className={cn(
-                      'flex flex-row items-center gap-3 p-3 bg-white/10 rounded-xl border-2 active:bg-white/20 web:hover:bg-white/15',
-                      selectedBank === bank ? 'border-amber-400' : 'border-transparent'
+                      'flex flex-col p-4 bg-white/5 rounded-xl border-2 active:bg-white/10 transition-all',
+                      isSelected ? 'border-amber-400 bg-white/10' : 'border-transparent'
                     )}
                   >
-                    <View
-                      className={cn(
-                        'w-12 h-12 rounded-lg flex items-center justify-center',
-                        bank === 'bsi'
-                          ? 'bg-white'
-                          : bank === 'mandiri'
-                            ? 'bg-blue-900'
-                            : 'bg-orange-500'
-                      )}
-                    >
-                      <Text
-                        className={cn(
-                          'font-bold text-sm',
-                          bank === 'mandiri' ? 'text-yellow-400' : bank === 'bsi' ? 'text-emerald-700' : 'text-foreground'
+                    <View className="flex-row items-center gap-4">
+                        <View className="w-12 h-12 bg-white rounded-lg items-center justify-center p-1 overflow-hidden">
+                             {method.logoUrl ? (
+                                 <Image 
+                                    source={{ uri: method.logoUrl }} 
+                                    className="w-full h-full" 
+                                    resizeMode="contain" 
+                                />
+                             ) : (
+                                <Text className="text-black text-xs font-bold">{method.name.substring(0, 3)}</Text>
+                             )}
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-foreground font-semibold font-poppins text-base">
+                                {method.name}
+                            </Text>
+                            <Text className="text-white/60 text-xs font-poppins">
+                                {method.type === 'qris' ? 'Scan QR Code' : 'Transfer Bank'}
+                            </Text>
+                        </View>
+                        {isSelected && (
+                             <MaterialCommunityIcons name="check-circle" size={24} color="#fbbf24" />
                         )}
-                      >
-                        {bankIcons[bank]}
-                      </Text>
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-foreground font-medium">
-                        {bankNames[bank]}
-                      </Text>
-                      <Text className="text-emerald-300 text-xs">
-                        QRIS Ready
-                      </Text>
-                    </View>
+
+                    {isSelected && (
+                        <View className="mt-4 pt-4 border-t border-white/10">
+                            {method.type === 'qris' ? (
+                                <View className="items-center gap-3">
+                                    <View className="w-48 h-48 bg-white rounded-xl items-center justify-center p-2">
+                                        <MaterialCommunityIcons name="qrcode-scan" size={150} color="black" />
+                                    </View>
+                                    <Pressable className="flex-row items-center gap-2 bg-emerald-600 px-4 py-2 rounded-full">
+                                        <MaterialCommunityIcons name="download" size={16} color="white" />
+                                        <Text className="text-white font-medium text-xs">Simpan QRIS</Text>
+                                    </Pressable>
+                                </View>
+                            ) : (
+                                <View className="gap-3">
+                                    <View>
+                                        <Text className="text-white/60 text-xs mb-1">Nomor Rekening</Text>
+                                        <View className="flex-row items-center gap-2">
+                                            <Text className="text-amber-400 text-xl font-mono font-bold">
+                                                {method.accountNumber}
+                                            </Text>
+                                            <Pressable onPress={() => copyToClipboard(method.accountNumber || '')}>
+                                                <MaterialCommunityIcons name="content-copy" size={18} color="rgba(255,255,255,0.7)" />
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                    <View>
+                                        <Text className="text-white/60 text-xs mb-1">Atas Nama</Text>
+                                        <Text className="text-foreground font-medium">{method.accountHolder}</Text>
+                                    </View>
+                                </View>
+                            )}
+                        </View>
+                    )}
                   </Pressable>
-                ))}
+                )})}
               </View>
             </View>
+
+            <View className="mb-8">
+                <Text className="text-emerald-300 text-sm mb-3 font-poppins">
+                    Bukti Transfer
+                </Text>
+                <Pressable 
+                    onPress={handleUploadProof}
+                    className={cn(
+                        "w-full h-24 rounded-xl border-2 border-dashed border-white/20 items-center justify-center bg-white/5",
+                        proofUploaded && "border-emerald-500 bg-emerald-500/10"
+                    )}
+                >
+                    {proofUploaded ? (
+                        <View className="items-center">
+                            <MaterialCommunityIcons name="check-circle-outline" size={32} color="#10b981" />
+                            <Text className="text-emerald-400 text-xs mt-2 font-medium">Bukti terupload</Text>
+                        </View>
+                    ) : (
+                        <View className="items-center">
+                            <MaterialCommunityIcons name="cloud-upload-outline" size={32} color="rgba(255,255,255,0.5)" />
+                            <Text className="text-white/50 text-xs mt-2 font-poppins">Tap untuk upload bukti</Text>
+                        </View>
+                    )}
+                </Pressable>
+            </View>
+
           </BottomSheetContent>
           </BottomSheetScrollView>
 
@@ -233,9 +296,10 @@ export default function PaymentModal({
               onPress={handleProcessPayment}
               disabled={!isReady}
               className={cn(
-                'w-full rounded-xl overflow-hidden h-14 relative flex-shrink-0',
+                'w-full rounded-xl overflow-hidden h-14 relative flex-shrink-0 mb-4 mx-4 self-center',
                 !isReady && 'opacity-50'
               )}
+              style={{ width: '92%' }}
             >
               <LinearGradient
                 colors={['#d4af37', '#f4d03f', '#d4af37']}
@@ -244,8 +308,8 @@ export default function PaymentModal({
                 style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
               />
               <View className="w-full h-full justify-center items-center py-4 z-10">
-                <Text className="text-center text-emerald-900 font-semibold text-base">
-                  Tampilkan QRIS
+                <Text className="text-center text-emerald-900 font-bold text-base font-poppins">
+                  {selectedMethod?.type === 'qris' ? 'Saya Sudah Scan QRIS' : 'Konfirmasi Transfer'}
                 </Text>
               </View>
             </Pressable>
@@ -255,3 +319,5 @@ export default function PaymentModal({
     </>
   );
 }
+
+
