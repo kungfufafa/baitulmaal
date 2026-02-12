@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import {
   Amiri_400Regular,
@@ -31,6 +32,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -56,27 +59,29 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <DonationProvider>
-          <PaymentSheetProvider>
-            <QuranProvider>
-              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <SafeAreaProvider>
-                  <View className="flex-1 bg-emerald-900">
-                    <BackgroundPattern />
-                    <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
-                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    </Stack>
-                    <StatusBar style="light" />
-                    <PortalHost />
-                    <GlobalPaymentSheet />
-                  </View>
-                </SafeAreaProvider>
-              </ThemeProvider>
-            </QuranProvider>
-          </PaymentSheetProvider>
-        </DonationProvider>
-      </BottomSheetModalProvider>
+      <QueryClientProvider client={queryClient}>
+        <BottomSheetModalProvider>
+          <DonationProvider>
+            <PaymentSheetProvider>
+              <QuranProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                  <SafeAreaProvider>
+                    <View className="flex-1 bg-emerald-900">
+                      <BackgroundPattern />
+                      <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      </Stack>
+                      <StatusBar style="light" />
+                      <PortalHost />
+                      <GlobalPaymentSheet />
+                    </View>
+                  </SafeAreaProvider>
+                </ThemeProvider>
+              </QuranProvider>
+            </PaymentSheetProvider>
+          </DonationProvider>
+        </BottomSheetModalProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

@@ -1,16 +1,15 @@
-import { MemberPrayer } from '@/types';
-import { MOCK_MEMBER_PRAYERS } from '@/lib/mock-data';
-import { View, Pressable, Image, ScrollView } from 'react-native';
+import { View, Pressable, Image, ActivityIndicator } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useMemberPrayers, useAmenMutation } from '@/hooks/useBaitulMaal';
 
 export default function SocialPrayerFeed() {
-    const [prayers, setPrayers] = useState<MemberPrayer[]>(MOCK_MEMBER_PRAYERS);
+    const { data: prayers, isLoading } = useMemberPrayers();
+    const amenMutation = useAmenMutation();
     const [likedPrayers, setLikedPrayers] = useState<Set<string>>(new Set());
 
     const handleLike = (id: string) => {
@@ -23,18 +22,12 @@ export default function SocialPrayerFeed() {
             return next;
         });
 
-        setPrayers(currentPrayers => 
-            currentPrayers.map(p => {
-                if (p.id === id) {
-                    return {
-                        ...p,
-                        likesCount: isLiked ? p.likesCount - 1 : p.likesCount + 1
-                    };
-                }
-                return p;
-            })
-        );
+        amenMutation.mutate(id);
     };
+
+    if (isLoading) {
+        return <ActivityIndicator size="small" color="#fbbf24" className="py-4" />;
+    }
 
     return (
         <View className="px-4 py-4 mb-4">
@@ -44,7 +37,7 @@ export default function SocialPrayerFeed() {
             </View>
             
             <View className="gap-3">
-                {prayers.map((prayer) => {
+                {prayers?.map((prayer) => {
                      const isLiked = likedPrayers.has(prayer.id);
                      const timeAgo = formatDistanceToNow(new Date(prayer.createdAt), { addSuffix: true, locale: id });
                      

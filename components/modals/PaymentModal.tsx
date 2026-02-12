@@ -10,13 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { PaymentCategory, PaymentType, PaymentMethod } from '@/types';
-import { MOCK_PAYMENT_METHODS } from '@/lib/mock-data';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useState } from 'react';
-import { Platform, Pressable, View, Image } from 'react-native';
+import { Platform, Pressable, View, Image, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useToast } from '@/hooks/useToast';
+import { usePaymentMethods, useDonationMutation } from '@/hooks/useBaitulMaal';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -40,6 +40,9 @@ export default function PaymentModal({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [proofUploaded, setProofUploaded] = useState(false);
   const { showToast } = useToast();
+
+  const { data: paymentMethods, isLoading: isLoadingMethods } = usePaymentMethods();
+  const donationMutation = useDonationMutation();
 
   const zakatTypes: PaymentType[] = ['maal', 'fitrah', 'profesi'];
   const infakTypes: PaymentType[] = ['jariyah', 'kemanusiaan', 'umum'];
@@ -70,14 +73,30 @@ export default function PaymentModal({
     return parseInt(formatted.replace(/\./g, '') || '0', 10);
   };
 
-  const isReady = getRawValue(amount) > 0 && selectedMethod;
+  const isReady = getRawValue(amount) > 0 && selectedMethod && !donationMutation.isPending;
 
   const handleProcessPayment = () => {
     if (!selectedMethod || getRawValue(amount) <= 0) return;
-    onConfirm(getRawValue(amount), selectedPaymentType, selectedMethod);
-    setAmount('');
-    setSelectedMethod(null);
-    setProofUploaded(false);
+    
+    donationMutation.mutate({
+      amount: getRawValue(amount),
+      paymentType: selectedPaymentType,
+      paymentMethodId: selectedMethod.id,
+      category,
+      paymentMethod: selectedMethod, // Keeping consistent with existing logic if needed
+      proofUrl: proofUploaded ? 'mock_proof_url' : undefined,
+    }, {
+      onSuccess: () => {
+         onConfirm(getRawValue(amount), selectedPaymentType, selectedMethod);
+         setAmount('');
+         setSelectedMethod(null);
+         setProofUploaded(false);
+         showToast('Donasi berhasil dikirim', '✅');
+      },
+      onError: () => {
+        showToast('Gagal mengirim donasi', '❌');
+      }
+    });
   };
 
   const handleAmountChange = (text: string) => {
@@ -189,7 +208,10 @@ export default function PaymentModal({
                 Metode Pembayaran
               </Text>
               <View className="gap-3">
-                {MOCK_PAYMENT_METHODS.map((method) => {
+                {isLoadingMethods ? (
+                    <ActivityIndicator size="small" color="#fbbf24" />
+                ) : (
+                    paymentMethods?.map((method) => {
                     const isSelected = selectedMethod?.id === method.id;
                     return (
                   <Pressable
@@ -259,7 +281,8 @@ export default function PaymentModal({
                         </View>
                     )}
                   </Pressable>
-                )})}
+                )})
+                )}
               </View>
             </View>
 
@@ -308,9 +331,13 @@ export default function PaymentModal({
                 style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
               />
               <View className="w-full h-full justify-center items-center py-4 z-10">
-                <Text className="text-center text-emerald-900 font-bold text-base font-poppins">
-                  {selectedMethod?.type === 'qris' ? 'Saya Sudah Scan QRIS' : 'Konfirmasi Transfer'}
-                </Text>
+                {donationMutation.isPending ? (
+                    <ActivityIndicator size="small" color="#064e3b" />
+                ) : (
+                    <Text className="text-center text-emerald-900 font-bold text-base font-poppins">
+                    {selectedMethod?.type === 'qris' ? 'Saya Sudah Scan QRIS' : 'Konfirmasi Transfer'}
+                    </Text>
+                )}
               </View>
             </Pressable>
           </BottomSheetFooter>
