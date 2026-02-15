@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Graphic - LAZ Al Azhar 5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .feature-graphic {
+            width: 1024px;
+            height: 500px;
+            background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+        }
+
+        /* Decorative elements */
+        .pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .circle-1 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            top: -200px;
+            right: -100px;
+        }
+
+        .circle-2 {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            bottom: -150px;
+            left: -50px;
+        }
+
+        /* Content */
+        .content {
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            flex: 1;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .logo img {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+        }
+
+        .logo-placeholder {
+            font-size: 32px;
+            font-weight: bold;
+            color: #064e3b;
+        }
+
+        .brand-name {
+            font-size: 42px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .feature-item .icon {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        /* Phone mockup */
+        .phone-section {
+            position: relative;
+            z-index: 10;
+            margin-left: 40px;
+        }
+
+        .phone {
+            width: 200px;
+            height: 400px;
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transform: rotate(5deg);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #064e3b 0%, #047857 100%);
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-header {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .phone-header-text {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .phone-content {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .phone-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .phone-card-title {
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .phone-card-text {
+            color: white;
+            font-size: 8px;
+        }
+
+        .phone-qr {
+            width: 50px;
+            height: 50px;
+            background: white;
+            margin: 10px auto;
+            border-radius: 5px;
+        }
+
+        .download-badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .download-badge img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .download-text {
+            font-size: 12px;
+            color: #333;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="feature-graphic">
+        <div class="pattern"></div>
+        <div class="circle-1"></div>
+        <div class="circle-2"></div>
+
+        <div class="content">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-placeholder">🕌</div>
+                </div>
+                <div>
+                    <div class="brand-name">LAZ Al Azhar 5</div>
+                    <div class="tagline">Zakat, Infak & Sedekah Jadi Lebih Mudah</div>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <span class="icon">💰</span>
+                    Donasi Online
+                </div>
+                <div class="feature-item">
+                    <span class="icon">📱</span>
+                    Scan QRIS
+                </div>
+                <div class="feature-item">
+                    <span class="icon">📖</span>
+                    Tracking Al-Quran
+                </div>
+                <div class="feature-item">
+                    <span class="icon">🕌</span>
+                    Jadwal Sholat
+                </div>
+            </div>
+        </div>
+
+        <div class="phone-section">
+            <div class="phone">
+                <div class="phone-screen">
+                    <div class="phone-header">
+                        <div class="phone-header-text">LAZ Al Azhar 5</div>
+                    </div>
+                    <div class="phone-content">
+                        <div class="phone-card">
+                            <div class="phone-card-title">💰 Bayar Zakat</div>
+                            <div class="phone-card-text">Fitrah, Maal, Profesi</div>
+                        </div>
+                        <div class="phone-card">
+                            <div class="phone-card-title">📱 QRIS</div>
+                            <div class="phone-card-text">Scan & bayar instan</div>
+                        </div>
+                        <div class="phone-qr"></div>
+                        <div class="phone-card">
+                            <div class="phone-card-title">📊 Riwayat</div>
+                            <div class="phone-card-text">Lacak semua donasi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="download-badge">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#34a853">
+                <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+            </svg>
+            <span class="download-text">GET IT ON<br>Google Play</span>
+        </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 20px; color: #666;">
+        📐 Ukuran: 1024 x 500 px | 🖼️ Screenshot halaman ini, lalu crop sesuai ukuran
+    </p>
+</body>
+</html>

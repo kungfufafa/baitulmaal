@@ -1,7 +1,7 @@
 import { Config, Surah, Doa, Slide, PrayerTime } from '@/types';
 
 export const defaultConfig: Config = {
-  org_name: 'Baitul Maal',
+  org_name: 'LAZ Al Azhar 5',
   tagline: 'Amanah dalam Berbagi',
   primary_color: '#064e3b',
   secondary_color: '#d4af37',
@@ -146,5 +146,15 @@ export const bankLabels: Record<string, string> = {
 
 export const categoryLabels: Record<string, string> = {
   zakat: 'Zakat',
-  infak: 'Infak/Sedekah',
+  infak: 'Infak',
+  sedekah: 'Sedekah',
+};
+
+export const paymentTypeLabels: Record<string, string> = {
+  maal: 'Zakat Maal',
+  fitrah: 'Zakat Fitrah',
+  profesi: 'Zakat Profesi',
+  kemanusiaan: 'Infak Kemanusiaan',
+  umum: 'Umum',
+  jariyah: 'Sedekah Jariyah',
 };

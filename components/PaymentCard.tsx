@@ -55,3 +55,11 @@ export function InfakIcon() {
     </Svg>
   );
 }
+
+export function SedekahIcon() {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#fb7185" strokeWidth={2}>
+      <Path strokeLinecap="round" strokeLinejoin="round" d="M12 21c-4.97-3.833-8-6.86-8-10a4 4 0 017.5-2 4 4 0 017.5 2c0 3.14-3.03 6.167-8 10z" />
+    </Svg>
+  );
+}

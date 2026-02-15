@@ -1,6 +1,8 @@
+import { TOAST_BG } from '@/constants/colors';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ToastState {
   visible: boolean;
@@ -13,6 +15,7 @@ interface ToastOptions {
 }
 
 export function useToast() {
+  const insets = useSafeAreaInsets();
   const [toast, setToast] = useState<ToastState>({
     visible: false,
     message: '',
@@ -22,6 +25,7 @@ export function useToast() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-50)).current;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastTop = Math.max(insets.top + 24, 88);
 
   useEffect(() => {
     return () => {
@@ -38,6 +42,9 @@ export function useToast() {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+
+    fadeAnim.stopAnimation();
+    slideAnim.stopAnimation();
 
     setToast({ visible: true, message, icon });
     fadeAnim.setValue(0);
@@ -91,7 +98,7 @@ export function useToast() {
   }, [fadeAnim, slideAnim]);
 
   const ToastComponent = toast.visible ? (
-    <View className="absolute top-20 left-0 right-0 z-50 items-center pointer-events-none">
+    <View className="absolute left-0 right-0 z-50 items-center pointer-events-none" style={{ top: toastTop }}>
       <Animated.View
         style={{
           opacity: fadeAnim,
@@ -99,7 +106,7 @@ export function useToast() {
         }}
       >
         <View
-          style={{ backgroundColor: '#111827' }}
+          style={{ backgroundColor: TOAST_BG }}
           className="px-6 py-3 rounded-xl flex flex-row items-center gap-2 shadow-lg"
         >
           <Text className="text-white">{toast.icon}</Text>

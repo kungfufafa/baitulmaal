@@ -1,114 +1,127 @@
 import ScreenShell from '@/components/ScreenShell';
-import { doaCollection } from '@/constants';
-import { loadDoaByType } from '@/lib/doa';
-import { DoaItem, DoaType } from '@/types';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import SocialPrayerFeed from '@/components/SocialPrayerFeed';
+import { Text } from '@/components/ui/text';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePostMemberPrayer } from '@/hooks/useBaitulMaal';
+import { useQueryClient } from '@tanstack/react-query';
+import { Href, useRouter } from 'expo-router';
+import { AMBER_400, EMERALD_900 } from '@/constants/colors';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
-const doaTypeLabels: Record<DoaType, string> = {
-    pagi: 'Pagi',
-    petang: 'Petang',
-    tidur: 'Tidur',
-    makan: 'Makan',
-};
+const MIN_PRAYER_LENGTH = 5;
 
 export default function DoaScreen() {
-    const params = useLocalSearchParams<{ type?: string }>();
-    const paramType = useMemo<DoaType>(() => {
-        const raw = Array.isArray(params.type) ? params.type[0] : params.type;
-        if (raw === 'pagi' || raw === 'petang' || raw === 'tidur' || raw === 'makan') {
-            return raw;
-        }
-        return 'pagi';
-    }, [params.type]);
-
-    const [selectedType, setSelectedType] = useState<DoaType>(paramType);
-    const [items, setItems] = useState<DoaItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [content, setContent] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const doaTypes: DoaType[] = ['pagi', 'petang', 'tidur', 'makan'];
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { user } = useAuth();
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const postPrayerMutation = usePostMemberPrayer();
 
-    useEffect(() => {
-        setSelectedType(paramType);
-    }, [paramType]);
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true);
+        try {
+            await queryClient.refetchQueries({ queryKey: ['member-prayers'] });
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [queryClient]);
 
-    useEffect(() => {
-        let isMounted = true;
-        const load = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const result = await loadDoaByType(selectedType);
-                if (!isMounted) return;
-                if (result.items.length > 0) {
-                    setItems(result.items);
-                } else {
-                    setItems(doaCollection[selectedType]?.items ?? []);
-                }
-            } catch (err) {
-                if (!isMounted) return;
-                setError('Gagal memuat doa online, menampilkan offline');
-                setItems(doaCollection[selectedType]?.items ?? []);
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
+    const handleSubmitPrayer = () => {
+        if (!user) {
+            router.push('/(auth)/login' as Href);
+            return;
+        }
+
+        const trimmedContent = content.trim();
+        if (trimmedContent.length < MIN_PRAYER_LENGTH) {
+            setError(`Isi doa minimal ${MIN_PRAYER_LENGTH} karakter.`);
+            return;
+        }
+
+        setError(null);
+        postPrayerMutation.mutate(
+            { content: trimmedContent, isAnonymous },
+            {
+                onSuccess: () => {
+                    setContent('');
+                    setIsAnonymous(true);
+                },
+                onError: () => {
+                    setError('Gagal mengirim doa. Silakan coba lagi.');
+                },
             }
-        };
-
-        load();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [selectedType]);
+        );
+    };
 
     return (
-        <ScreenShell title="🤲 Kumpulan Doa" scrollable={false}>
-            <View className="flex-row gap-2 mb-4">
-                {doaTypes.map((type) => (
-                    <TouchableOpacity
-                        key={type}
-                        onPress={() => setSelectedType(type)}
-                        className={`px-4 py-2 rounded-full ${selectedType === type ? 'bg-amber-400' : 'bg-white/10'}`}
-                    >
-                        <Text className={`font-poppins text-sm ${selectedType === type ? 'text-emerald-900 font-medium' : 'text-white'}`}>
-                            {doaTypeLabels[type]}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+        <ScreenShell title="🤲 Titip Doa Bersama" scrollable={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={(
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={handleRefresh}
+                        tintColor={AMBER_400}
+                        colors={[AMBER_400]}
+                    />
+                )}
+            >
+                <View className="bg-white/10 rounded-xl p-4 border border-white/10 mb-4">
+                    <Text className="text-white/90 text-sm mb-3 font-poppins">
+                        Titipkan doa Anda, lalu jamaah lain bisa mengaminkan bersama.
+                    </Text>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-                <Text className="text-lg font-bold text-amber-400 mb-2 font-poppins">
-                    {`Doa ${doaTypeLabels[selectedType]}`}
-                </Text>
-                {loading && (
-                    <Text className="text-emerald-300 text-xs mb-3">Memuat doa...</Text>
-                )}
-                {!loading && error && (
-                    <Text className="text-amber-300 text-xs mb-3">{error}</Text>
-                )}
-                <View className="gap-4">
-                    {items.map((item, index) => (
-                        <View key={index} className="bg-white/10 rounded-xl p-4">
-                            {item.title && (
-                                <Text className="text-foreground font-semibold text-sm mb-2 font-poppins">
-                                    {item.title}
-                                </Text>
+                    <TextInput
+                        value={content}
+                        onChangeText={setContent}
+                        placeholder="Tuliskan doa Anda di sini..."
+                        placeholderTextColor="rgba(255,255,255,0.45)"
+                        multiline
+                        maxLength={500}
+                        textAlignVertical="top"
+                        className="min-h-[110px] rounded-xl border border-white/20 bg-emerald-950/40 p-3 text-white"
+                    />
+                    <Text className="text-white/40 text-xs text-right mt-1">{content.length}/500</Text>
+
+                    <View className="flex-row items-center justify-between mt-3">
+                        <Pressable
+                            onPress={() => setIsAnonymous((prev) => !prev)}
+                            className={`px-3 py-2 rounded-full border ${isAnonymous ? 'bg-white/10 border-white/20' : 'bg-amber-400 border-amber-400'}`}
+                        >
+                            <Text className={`text-xs font-medium ${isAnonymous ? 'text-white' : 'text-emerald-900'}`}>
+                                {isAnonymous ? 'Anonim Aktif' : 'Publik'}
+                            </Text>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={handleSubmitPrayer}
+                            disabled={postPrayerMutation.isPending}
+                            className={`px-4 py-2 rounded-full ${postPrayerMutation.isPending ? 'bg-amber-400/60' : 'bg-amber-400'}`}
+                        >
+                            {postPrayerMutation.isPending ? (
+                                <ActivityIndicator size="small" color={EMERALD_900} />
+                            ) : (
+                                <Text className="text-emerald-900 text-sm font-semibold">Kirim Doa</Text>
                             )}
-                            <Text className="text-amber-400 text-xl text-right leading-loose mb-3 font-amiri">
-                                {item.arabic}
-                            </Text>
-                            <Text className="text-emerald-200 text-sm italic mb-2 font-poppins">
-                                {item.latin}
-                            </Text>
-                            <Text className="text-white text-sm font-poppins">{item.arti}</Text>
-                        </View>
-                    ))}
+                        </Pressable>
+                    </View>
+
+                    {error && (
+                        <Text className="text-amber-300 text-xs mt-3">{error}</Text>
+                    )}
                 </View>
+
+                <SocialPrayerFeed showSectionHeader={false} showWriteButton={false} className="px-0 py-0 mb-0" />
             </ScrollView>
         </ScreenShell>
     );
 }
+
+const styles = StyleSheet.create({
+    scrollContent: { paddingBottom: 120 },
+});

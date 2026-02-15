@@ -48,3 +48,30 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Android Play Store release (mandatory preflight)
+
+1. Set compliance URLs (HTTPS):
+
+   ```bash
+   export PLAYSTORE_PRIVACY_POLICY_URL="https://your-domain.com/privacy-policy"
+   export PLAYSTORE_ACCOUNT_DELETION_URL="https://your-domain.com/account-deletion"
+   ```
+
+2. Run preflight:
+
+   ```bash
+   npm run preflight:android:playstore
+   ```
+
+3. Build AAB (preflight is enforced automatically):
+
+   ```bash
+   npm run build:android:production
+   ```
+
+4. Before submit in Play Console, ensure:
+- Privacy policy URL in Play Console matches the URL used above.
+- Account deletion URL in Play Console matches the URL used above.
+- Data safety form matches actual app behavior (location, notifications, photo gallery access).
+- No blocked permissions appear in final permission list (camera, microphone, media audio/video).

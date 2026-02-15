@@ -6,7 +6,7 @@ import BottomSheetLib, {
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { Platform, Pressable, ScrollView, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleProp, View, ViewStyle } from 'react-native';
 import { Text } from './text';
 
 const BottomSheetScrollView = ({ className, ...props }: any) => {
@@ -32,6 +32,7 @@ interface BottomSheetProps {
   children: React.ReactNode;
   enablePanDownToClose?: boolean;
   enableDynamicSizing?: boolean;
+  bottomInset?: number;
 }
 
 const BottomSheet = React.forwardRef<BottomSheetLib, BottomSheetProps>(
@@ -43,6 +44,7 @@ const BottomSheet = React.forwardRef<BottomSheetLib, BottomSheetProps>(
       children,
       enablePanDownToClose = true,
       enableDynamicSizing = false,
+      bottomInset = 0,
     },
     ref
   ) => {
@@ -120,6 +122,7 @@ const BottomSheet = React.forwardRef<BottomSheetLib, BottomSheetProps>(
         snapPoints={enableDynamicSizing ? undefined : snapPoints}
         enableDynamicSizing={enableDynamicSizing}
         enablePanDownToClose={enablePanDownToClose}
+        bottomInset={bottomInset}
         onChange={handleSheetChanges}
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: '#064e3b' }}
@@ -175,11 +178,12 @@ function BottomSheetContent({ children, className }: BottomSheetContentProps) {
 interface BottomSheetFooterProps {
   children: React.ReactNode;
   className?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
-function BottomSheetFooter({ children, className }: BottomSheetFooterProps) {
+function BottomSheetFooter({ children, className, style }: BottomSheetFooterProps) {
   return (
-    <View className={cn('px-6 pb-8 pt-4 border-t border-white/10', className)}>
+    <View className={cn('px-6 pb-8 pt-4 border-t border-white/10', className)} style={style}>
       {children}
     </View>
   );
@@ -192,4 +196,3 @@ export {
   BottomSheetHeader,
   BottomSheetTitle
 };
-

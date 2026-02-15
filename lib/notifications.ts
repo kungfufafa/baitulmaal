@@ -48,6 +48,11 @@ export async function ensurePrayerNotificationChannel() {
 export async function schedulePrayerNotifications(prayers: PrayerTime[], city: string) {
   if (Platform.OS === 'web') return;
 
+  const granted = await ensureNotificationPermission();
+  if (!granted) return;
+
+  await ensurePrayerNotificationChannel();
+
   const existingIdsRaw = await AsyncStorage.getItem(PRAYER_IDS_KEY);
   if (existingIdsRaw) {
     try {
@@ -55,36 +60,28 @@ export async function schedulePrayerNotifications(prayers: PrayerTime[], city: s
       for (const id of ids) {
         try {
           await Notifications.cancelScheduledNotificationAsync(id);
-        } catch {
-          // ignore
+        } catch (e) {
+          if (__DEV__) console.warn('Failed to cancel notification', id, e);
         }
       }
-    } catch {
-      // ignore invalid cache
+    } catch (e) {
+      if (__DEV__) console.warn('Failed to parse existing notification IDs', e);
     }
   }
 
   const scheduledIds: string[] = [];
-
-  const now = new Date();
-  const scheduleTargets = prayers.map((prayer) => {
-    const triggerDate = new Date(now);
-    triggerDate.setHours(prayer.hour, prayer.minute, 0, 0);
-    return { prayer, triggerDate };
-  });
-
-  for (const target of scheduleTargets) {
-    if (target.triggerDate <= now) continue;
+  for (const prayer of prayers) {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Waktu Sholat',
-        body: `Saatnya sholat ${target.prayer.name} di ${city}`,
+        body: `Saatnya sholat ${prayer.name} di ${city}`,
         sound: 'default',
         ...(Platform.OS === 'android' ? { channelId: ANDROID_CHANNEL_ID } : null),
       },
       trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: target.triggerDate,
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: prayer.hour,
+        minute: prayer.minute,
       },
     });
     scheduledIds.push(id);
@@ -127,8 +124,8 @@ export async function scheduleQuranReminder(time: string) {
   if (existingId) {
     try {
       await Notifications.cancelScheduledNotificationAsync(existingId);
-    } catch {
-      // ignore
+    } catch (e) {
+      if (__DEV__) console.warn('Failed to cancel quran reminder', e);
     }
   }
 
@@ -157,8 +154,8 @@ export async function cancelQuranReminder() {
   if (existingId) {
     try {
       await Notifications.cancelScheduledNotificationAsync(existingId);
-    } catch {
-      // ignore
+    } catch (e) {
+      if (__DEV__) console.warn('Failed to cancel quran reminder on removal', e);
     }
   }
   await AsyncStorage.removeItem(QURAN_REMINDER_KEY);

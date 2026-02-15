@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ensureNotificationPermission, initNotifications, scheduleQuranReminder, cancelQuranReminder } from '@/lib/notifications';
+import { ensureNotificationPermission, scheduleQuranReminder, cancelQuranReminder } from '@/lib/notifications';
 import { QuranProgress } from '@/types';
 
 interface ReminderResult {
@@ -28,7 +28,6 @@ export function QuranProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    initNotifications();
     const hydrate = async () => {
       try {
         const storedProgress = await AsyncStorage.getItem(PROGRESS_KEY);
@@ -78,7 +77,7 @@ export function QuranProvider({ children }: { children: React.ReactNode }) {
       return { ok: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Gagal mengatur pengingat';
-      console.warn('scheduleQuranReminder failed', err);
+      if (__DEV__) console.warn('scheduleQuranReminder failed', err);
       return { ok: false, message };
     }
   }, []);

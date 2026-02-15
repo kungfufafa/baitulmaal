@@ -82,7 +82,7 @@ export default function QuranScreen() {
                 const result = await loadSurahList();
                 if (!isMounted) return;
                 setSurahs(result.data);
-            } catch (err) {
+            } catch {
                 if (!isMounted) return;
                 setError('Gagal memuat daftar surah');
             } finally {

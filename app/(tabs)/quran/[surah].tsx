@@ -97,7 +97,7 @@ export default function QuranDetailScreen() {
         const result = await loadSurahDetail(surahNumber);
         if (!isMounted) return;
         setDetail(result.data);
-      } catch (err) {
+      } catch {
         if (!isMounted) return;
         setError('Gagal memuat detail surah');
       } finally {
@@ -113,11 +113,11 @@ export default function QuranDetailScreen() {
     };
   }, [surahNumber]);
 
-  const scrollToAyat = (ayatNumber: number) => {
+  const scrollToAyat = useCallback((ayatNumber: number) => {
     if (!listRef.current || !detail) return;
     const index = Math.max(0, ayatNumber - 1);
     listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.2 });
-  };
+  }, [detail]);
 
   useEffect(() => {
     if (!detail || !params.ayat) return;
@@ -125,7 +125,7 @@ export default function QuranDetailScreen() {
       scrollToAyat(initialAyat);
     }, 50);
     return () => clearTimeout(timeout);
-  }, [detail, initialAyat, params.ayat]);
+  }, [detail, initialAyat, params.ayat, scrollToAyat]);
 
   const handleBookmarkAyat = useCallback((ayatNumber: number) => {
     setProgress({ surah: surahNumber, ayat: ayatNumber });

@@ -6,7 +6,10 @@ import {
   toggleAmen, 
   fetchVideos, 
   fetchArticles, 
-  submitDonation 
+  submitDonation,
+  fetchDonationHistory,
+  fetchDonationConfig,
+  calculateZakat,
 } from '../lib/api/services';
 import { 
   MOCK_PAYMENT_METHODS, 
@@ -14,11 +17,9 @@ import {
   MOCK_VIDEOS, 
   MOCK_ARTICLES 
 } from '../lib/mock-data';
-import { MemberPrayer, Donation } from '../types';
+import { MemberPrayer, Donation, DonationConfig, ZakatCalculationPayload, ZakatCalculationResult } from '../types';
 
-// Feature flag for using real API vs Mock Data
-// Set to true to test API integration
-const USE_REAL_API = false;
+const USE_REAL_API = !__DEV__ || true;
 
 // Simulated delay for mock data
 const SIMULATED_DELAY = 1000;
@@ -80,10 +81,7 @@ export const usePostMemberPrayer = () => {
       
       return simulateApiCall(newPrayer);
     },
-    onSuccess: (newPrayer) => {
-      queryClient.setQueryData(['member-prayers', 1], (oldData: MemberPrayer[] | undefined) => {
-        return oldData ? [newPrayer, ...oldData] : [newPrayer];
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['member-prayers'] });
     },
   });
@@ -100,7 +98,7 @@ export const useAmenMutation = () => {
       // Mock toggling amen logic
       return simulateApiCall({ success: true, likesCount: 0 }); 
     },
-     onSuccess: (_, prayerId) => {
+     onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['member-prayers'] });
      }
   });
@@ -131,6 +129,8 @@ export const useArticles = () => {
 };
 
 export const useDonationMutation = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data: Partial<Donation>) => {
       if (USE_REAL_API) {
@@ -140,16 +140,118 @@ export const useDonationMutation = () => {
       const mockDonation: Donation = {
         id: `donation_${Date.now()}`,
         type: 'donation',
-        category: data.category || 'infak', 
+        category: data.category || 'infak',
         paymentType: data.paymentType || 'umum',
         amount: data.amount || 0,
         paymentMethodId: data.paymentMethodId || '',
+        paymentMethod: data.paymentMethod,
+        paymentMethodName: data.paymentMethodName,
         status: 'pending',
         createdAt: new Date().toISOString(),
-        ...data as any // Cast for mock convenience
       };
       
       return simulateApiCall(mockDonation);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donation-history'] });
+    },
+  });
+};
+
+export const useDonationConfig = () => {
+  return useQuery({
+    queryKey: ['donation-config'],
+    queryFn: async () => {
+      if (USE_REAL_API) {
+        return fetchDonationConfig();
+      }
+
+      const mockConfig: DonationConfig = {
+        categories: [
+          {
+            key: 'zakat',
+            label: 'Zakat',
+            paymentTypes: [
+              { key: 'maal', label: 'Zakat Maal' },
+              { key: 'fitrah', label: 'Zakat Fitrah' },
+              { key: 'profesi', label: 'Zakat Profesi' },
+            ],
+          },
+          {
+            key: 'infak',
+            label: 'Infak',
+            paymentTypes: [
+              { key: 'kemanusiaan', label: 'Infak Kemanusiaan' },
+              { key: 'umum', label: 'Infak Umum' },
+            ],
+          },
+          {
+            key: 'sedekah',
+            label: 'Sedekah',
+            paymentTypes: [
+              { key: 'jariyah', label: 'Sedekah Jariyah' },
+              { key: 'umum', label: 'Sedekah Umum' },
+            ],
+          },
+        ],
+        contexts: {
+          infak: [
+            { slug: 'infak-pendidikan', label: 'Infak Pendidikan' },
+            { slug: 'infak-kemanusiaan', label: 'Infak Kemanusiaan' },
+          ],
+          sedekah: [
+            { slug: 'sedekah-jariyah', label: 'Sedekah Jariyah' },
+            { slug: 'sedekah-subuh', label: 'Sedekah Subuh' },
+          ],
+        },
+        zakat: {
+          calculatorTypes: [
+            { key: 'fitrah', label: 'Zakat Fitrah' },
+            { key: 'maal', label: 'Zakat Maal' },
+            { key: 'profesi', label: 'Zakat Profesi' },
+          ],
+          defaults: {
+            fitrahRiceKgPerPerson: 2.5,
+            maalNisabGoldGrams: 85,
+            profesiNisabGoldGrams: 85,
+          },
+        },
+        recommendedAmounts: [25000, 50000, 100000, 250000, 500000, 1000000],
+      };
+
+      return simulateApiCall(mockConfig);
+    },
+  });
+};
+
+export const useZakatCalculator = () => {
+  return useMutation({
+    mutationFn: async (payload: ZakatCalculationPayload): Promise<ZakatCalculationResult> => {
+      if (USE_REAL_API) {
+        return calculateZakat(payload);
+      }
+
+      return simulateApiCall({
+        type: payload.type,
+        recommendedAmount: 0,
+        isObligatory: false,
+        summary: 'Mock calculator',
+        breakdown: {},
+      });
+    },
+  });
+};
+
+export const useDonationHistory = (guestToken?: string, enabled = true) => {
+  return useQuery({
+    queryKey: ['donation-history', guestToken ?? 'auth'],
+    enabled,
+    queryFn: async () => {
+      if (USE_REAL_API) {
+        return fetchDonationHistory(guestToken);
+      }
+
+      return simulateApiCall([]);
     },
   });
 };

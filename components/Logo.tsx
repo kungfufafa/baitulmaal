@@ -1,10 +1,24 @@
-import Svg, { Circle } from 'react-native-svg';
+import { Image, Platform } from 'react-native';
 
-export default function Logo({ width = 40, height = 40 }: { width?: number; height?: number }) {
-    return (
-        <Svg width={width} height={height} viewBox="0 0 40 40">
-            <Circle cx={20} cy={20} r={16} fill="#fbbf24" />
-            <Circle cx={17} cy={20} r={12} fill="#064e3b" />
-        </Svg>
-    );
+const APP_LOGO = Platform.select({
+  ios: require('@/assets/images/ios_appstore_icon_1024.png'),
+  android: require('@/assets/images/playstore_icon_1024.png'),
+  default: require('@/assets/images/playstore_icon_1024.png'),
+});
+
+type LogoProps = {
+  width?: number;
+  height?: number;
+};
+
+export default function Logo({ width = 40, height = 40 }: LogoProps) {
+  const radius = Math.min(width, height) * 0.2;
+
+  return (
+    <Image
+      source={APP_LOGO}
+      style={{ width, height, borderRadius: radius }}
+      resizeMode="contain"
+    />
+  );
 }

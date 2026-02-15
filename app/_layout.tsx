@@ -1,17 +1,17 @@
+import { AuthProvider } from '@/contexts/AuthContext';
 import { DonationProvider } from '@/contexts/DonationContext';
-import { PaymentSheetProvider } from '@/contexts/PaymentSheetContext';
 import { QuranProvider } from '@/contexts/QuranContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { PortalHost } from '@rn-primitives/portal';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { ReanimatedLogLevel, configureReanimatedLogger } from 'react-native-reanimated';
 import '../global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initNotifications } from '@/lib/notifications';
 
 import {
   Amiri_400Regular,
@@ -26,18 +26,33 @@ import {
 } from '@expo-google-fonts/poppins';
 
 import BackgroundPattern from '@/components/BackgroundPattern';
-import GlobalPaymentSheet from '@/components/GlobalPaymentSheet';
 import { useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
-
-const queryClient = new QueryClient();
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
+});
 
 export default function RootLayout() {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+      },
+      mutations: {
+        retry: 1,
+      },
+    },
+  }));
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
+  const [loaded, error] = useFonts({
     Amiri: Amiri_400Regular,
     Amiri_Bold: Amiri_700Bold,
     Poppins: Poppins_400Regular,
@@ -48,39 +63,47 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) {
+    initNotifications();
+  }, []);
+
+  useEffect(() => {
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
-  if (!loaded) {
+  if (error) {
+    if (__DEV__) console.error('Error loading fonts:', error);
+    // Continue rendering with system fonts
+  }
+
+  if (!loaded && !error) {
     return null;
   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <BottomSheetModalProvider>
+        <AuthProvider>
           <DonationProvider>
-            <PaymentSheetProvider>
-              <QuranProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                  <SafeAreaProvider>
-                    <View className="flex-1 bg-emerald-900">
-                      <BackgroundPattern />
-                      <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' } }}>
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                      </Stack>
-                      <StatusBar style="light" />
-                      <PortalHost />
-                      <GlobalPaymentSheet />
-                    </View>
-                  </SafeAreaProvider>
-                </ThemeProvider>
-              </QuranProvider>
-            </PaymentSheetProvider>
+            <QuranProvider>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <SafeAreaProvider>
+                  <View className="flex-1 bg-emerald-900">
+                    <BackgroundPattern />
+                    <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
+                      <Stack.Screen name="content" />
+                      <Stack.Screen name="(auth)" />
+                      <Stack.Screen name="donation" />
+                    </Stack>
+                    <StatusBar style="light" />
+                    <PortalHost />
+                  </View>
+                </SafeAreaProvider>
+              </ThemeProvider>
+            </QuranProvider>
           </DonationProvider>
-        </BottomSheetModalProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

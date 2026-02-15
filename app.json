@@ -4,39 +4,43 @@
     "slug": "baitulmaal",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ios_appstore_icon_1024.png",
     "scheme": "baitulmaal",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "icon": "./assets/images/ios_appstore_icon_1024.png",
       "bundleIdentifier": "com.mekayastudio.baitulmaal",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "icon": "./assets/images/playstore_icon_1024.png",
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/playstore_icon_1024.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "POST_NOTIFICATIONS",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
       ],
       "package": "com.mekayastudio.baitulmaal",
-      "versionCode": 4
+      "versionCode": 7
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png",
+      "favicon": "./assets/images/ios_appstore_icon_1024.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -44,7 +48,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/ios_appstore_icon_1024.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -59,17 +63,38 @@
         {
           "locationWhenInUsePermission": "Izinkan Baitul Maal mengakses lokasi Anda untuk menampilkan jadwal sholat sesuai wilayah."
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Izinkan Baitul Maal mengakses foto Anda.",
+          "savePhotosPermission": "Izinkan Baitul Maal menyimpan QRIS ke galeri Anda.",
+          "granularPermissions": [
+            "photo"
+          ]
+        }
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
       "eas": {
         "projectId": "6a5fadf2-9933-4026-9186-09bf3c4cc257"
-      }
+      },
+      "privacyPolicyUrl": "https://laz.rizqis.com/privacy-policy",
+      "termsOfServiceUrl": "https://laz.rizqis.com/terms-of-service",
+      "supportUrl": "https://laz.rizqis.com/support"
     }
   }
 }

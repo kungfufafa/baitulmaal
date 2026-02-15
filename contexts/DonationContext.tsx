@@ -12,7 +12,7 @@ export function DonationProvider({ children }: { children: React.ReactNode }) {
     const [donations, setDonations] = useState<Donation[]>([]);
 
     const addDonation = useCallback((donation: Donation) => {
-        setDonations((prev) => [donation, ...prev]);
+        setDonations((prev) => [donation, ...prev].slice(0, 100));
     }, []);
 
     const contextValue = useMemo(() => ({

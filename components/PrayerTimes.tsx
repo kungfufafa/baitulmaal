@@ -5,19 +5,20 @@ import { formatTimeDifference, getNextPrayer } from '@/lib/formatters';
 import {
   ensureNotificationPermission,
   ensurePrayerNotificationChannel,
-  initNotifications,
   schedulePrayerNotifications,
 } from '@/lib/notifications';
 import { fetchPrayerTimesByCity } from '@/lib/prayerTimes';
 import { PrayerTime } from '@/types';
 import * as Location from 'expo-location';
-import React, { useEffect, useRef, useState } from 'react';
+import SectionHeader from '@/components/SectionHeader';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
+const DEFAULT_CITY = 'Jakarta';
+
 export default React.memo(function PrayerTimes() {
-  const defaultCity = 'Jakarta';
-  const [city, setCity] = useState(defaultCity);
-  const [locationLabel, setLocationLabel] = useState(`${defaultCity} (default)`);
+  const [city, setCity] = useState(DEFAULT_CITY);
+  const [locationLabel, setLocationLabel] = useState(`${DEFAULT_CITY} (default)`);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [locating, setLocating] = useState(true);
   const isMountedRef = useRef(true);
@@ -27,25 +28,25 @@ export default React.memo(function PrayerTimes() {
   const [error, setError] = useState<string | null>(null);
   const [readableDate, setReadableDate] = useState<string | null>(null);
 
-  const resolveCity = (place?: Location.LocationGeocodedAddress | null) => {
-    if (!place) return defaultCity;
+  const resolveCity = useCallback((place?: Location.LocationGeocodedAddress | null) => {
+    if (!place) return DEFAULT_CITY;
     return (
       place.city ||
       place.subregion ||
       place.region ||
       place.district ||
       place.name ||
-      defaultCity
+      DEFAULT_CITY
     );
-  };
+  }, []);
 
-  const refreshLocation = async () => {
+  const refreshLocation = useCallback(async () => {
     setLocating(true);
     setLocationError(null);
 
     if (Platform.OS === 'web') {
-      setCity(defaultCity);
-      setLocationLabel(`${defaultCity} (default)`);
+      setCity(DEFAULT_CITY);
+      setLocationLabel(`${DEFAULT_CITY} (default)`);
       setLocating(false);
       return;
     }
@@ -54,8 +55,8 @@ export default React.memo(function PrayerTimes() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         if (!isMountedRef.current) return;
-        setCity(defaultCity);
-        setLocationLabel(`${defaultCity} (default)`);
+        setCity(DEFAULT_CITY);
+        setLocationLabel(`${DEFAULT_CITY} (default)`);
         setLocationError('Izin lokasi tidak diberikan, pakai Jakarta');
         return;
       }
@@ -72,19 +73,19 @@ export default React.memo(function PrayerTimes() {
       const resolvedCity = resolveCity(place);
       setCity(resolvedCity);
       setLocationLabel(`${resolvedCity} (lokasi)`);
-    } catch (err) {
+    } catch {
       if (!isMountedRef.current) return;
-      setCity(defaultCity);
-      setLocationLabel(`${defaultCity} (default)`);
+      setCity(DEFAULT_CITY);
+      setLocationLabel(`${DEFAULT_CITY} (default)`);
       setLocationError('Gagal mendeteksi lokasi, pakai Jakarta');
     } finally {
       if (isMountedRef.current) {
         setLocating(false);
       }
     }
-  };
+  }, [resolveCity]);
 
-  const syncNotifications = async (times: PrayerTime[], cityName: string) => {
+  const syncNotifications = useCallback(async (times: PrayerTime[], cityName: string) => {
     if (Platform.OS === 'web') return;
     if (!isMountedRef.current) return;
 
@@ -95,10 +96,10 @@ export default React.memo(function PrayerTimes() {
 
       await ensurePrayerNotificationChannel();
       await schedulePrayerNotifications(times, cityName);
-    } catch (err) {
+    } catch {
       // silent fail for MVP
     }
-  };
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -123,7 +124,7 @@ export default React.memo(function PrayerTimes() {
         setPrayerTimes(result.prayers);
         setReadableDate(result.readableDate ?? null);
         await syncNotifications(result.prayers, city);
-      } catch (err) {
+      } catch {
         if (!isMounted) return;
         setError('Gagal memuat jadwal sholat');
       } finally {
@@ -138,15 +139,14 @@ export default React.memo(function PrayerTimes() {
     return () => {
       isMounted = false;
     };
-  }, [city]);
+  }, [city, syncNotifications]);
 
   useEffect(() => {
-    initNotifications();
     refreshLocation();
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [refreshLocation]);
 
   const statusMessage = loading
     ? 'Memuat jadwal...'
@@ -154,10 +154,7 @@ export default React.memo(function PrayerTimes() {
 
   return (
     <View className="px-4 py-4">
-      <View className="flex flex-row items-center gap-2 mb-3">
-        <View className="w-1 h-5 bg-primary rounded-full" />
-        <Text className="text-foreground font-semibold">Waktu Sholat</Text>
-      </View>
+      <SectionHeader title="Waktu Sholat" />
       <Card className="bg-white/10 border-white/10 backdrop-blur-sm">
         <CardContent className="p-4">
           <View className="mb-3">
@@ -178,8 +175,11 @@ export default React.memo(function PrayerTimes() {
             {statusMessage && (
               <Text className="text-emerald-300 text-xs mt-2">{statusMessage}</Text>
             )}
+            {readableDate && (
+              <Text className="text-white/60 text-xs mt-1">{readableDate}</Text>
+            )}
           </View>
-          <View className="grid grid-cols-5 gap-2 flex-row justify-between">
+          <View className="flex-row justify-between">
             {prayerTimes.map((prayer) => (
               <View key={prayer.name} className="p-2 items-center">
                 <Text className="text-emerald-300 text-xs mb-1 text-center">

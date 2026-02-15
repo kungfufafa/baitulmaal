@@ -1,20 +1,23 @@
-import { usePaymentSheet } from '@/contexts/PaymentSheetContext';
+import { EMERALD_900 } from '@/constants/colors';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { GestureResponderEvent, Text, TouchableOpacity, ViewStyle } from 'react-native';
 
 interface DonasiTabButtonProps {
     style?: ViewStyle;
     onPress?: (e: GestureResponderEvent) => void;
-    [key: string]: unknown;
 }
 
-export default function DonasiTabButton({ style, onPress, ...otherProps }: DonasiTabButtonProps) {
-    const { openPaymentSheet } = usePaymentSheet();
+export default function DonasiTabButton({ style, ...otherProps }: DonasiTabButtonProps) {
+    const router = useRouter();
 
     const handlePress = (e: GestureResponderEvent) => {
         e.preventDefault?.();
-        openPaymentSheet('zakat');
+        router.push({
+            pathname: '/donation/flow',
+            params: { category: 'sedekah' },
+        });
     };
 
     return (
@@ -41,11 +44,11 @@ export default function DonasiTabButton({ style, onPress, ...otherProps }: Donas
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 4,
-                    borderColor: '#064e3b',
+                    borderColor: EMERALD_900,
                 }}
                 className="shadow-lg"
             >
-                <MaterialCommunityIcons name="hand-coin" size={30} color="#064e3b" />
+                <MaterialCommunityIcons name="hand-coin" size={30} color={EMERALD_900} />
             </LinearGradient>
             <Text className="text-xs mt-1 text-amber-400 font-poppins font-medium">Donasi</Text>
         </TouchableOpacity>
