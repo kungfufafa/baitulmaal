@@ -1,6 +1,6 @@
 import { randomUUID } from 'expo-crypto';
 import apiClient from './client';
-import { API_URL, API_HOST } from './config';
+import { API_HOST } from './config';
 import {
   PaymentMethod,
   MemberPrayer,
@@ -17,6 +17,10 @@ import {
 
 type ApiCollectionResponse<T> = {
   data?: T[];
+  meta?: {
+    current_page?: number;
+    last_page?: number;
+  };
 } | T[];
 
 type ApiResourceResponse<T> = {
@@ -162,6 +166,54 @@ const unwrapCollection = <T>(payload: ApiCollectionResponse<T> | null | undefine
   }
 
   return Array.isArray(payload.data) ? payload.data : [];
+};
+
+const resolvePaginationMeta = (
+  payload: ApiCollectionResponse<unknown> | null | undefined
+): { currentPage: number; lastPage: number } | null => {
+  if (!payload || Array.isArray(payload)) {
+    return null;
+  }
+
+  const currentPage = Number(payload.meta?.current_page ?? 1);
+  const lastPage = Number(payload.meta?.last_page ?? 1);
+
+  if (!Number.isFinite(currentPage) || !Number.isFinite(lastPage)) {
+    return null;
+  }
+
+  return {
+    currentPage: Math.max(1, currentPage),
+    lastPage: Math.max(1, lastPage),
+  };
+};
+
+const fetchAllPages = async <T>(
+  path: string,
+  params?: Record<string, string | number | undefined>
+): Promise<T[]> => {
+  const firstResponse = await apiClient.get<ApiCollectionResponse<T>>(path, { params });
+  const firstPayload = firstResponse.data;
+  const firstItems = unwrapCollection(firstPayload);
+  const pagination = resolvePaginationMeta(firstPayload);
+
+  if (!pagination || pagination.lastPage <= pagination.currentPage) {
+    return firstItems;
+  }
+
+  const allItems = [...firstItems];
+  for (let page = pagination.currentPage + 1; page <= pagination.lastPage; page += 1) {
+    const response = await apiClient.get<ApiCollectionResponse<T>>(path, {
+      params: {
+        ...params,
+        page,
+      },
+    });
+
+    allItems.push(...unwrapCollection(response.data));
+  }
+
+  return allItems;
 };
 
 const unwrapResource = <T>(payload: ApiResourceResponse<T> | null | undefined): T | null => {
@@ -574,13 +626,24 @@ export const toggleAmen = async (prayerId: string): Promise<{ success: boolean; 
 };
 
 export const fetchVideos = async (): Promise<Video[]> => {
-  const response = await apiClient.get<ApiCollectionResponse<BackendVideo>>('/videos');
-  return unwrapCollection(response.data).map(mapVideo);
+  const videos = await fetchAllPages<BackendVideo>('/videos');
+  return videos.map(mapVideo);
 };
 
 export const fetchArticles = async (): Promise<Article[]> => {
-  const response = await apiClient.get<ApiCollectionResponse<BackendArticle>>('/articles');
-  return unwrapCollection(response.data).map(mapArticle);
+  const articles = await fetchAllPages<BackendArticle>('/articles');
+  return articles.map(mapArticle);
+};
+
+export const fetchArticleBySlug = async (slug: string): Promise<Article> => {
+  const response = await apiClient.get<ApiResourceResponse<BackendArticle>>(`/articles/${encodeURIComponent(slug)}`);
+  const article = unwrapResource(response.data);
+
+  if (!article) {
+    throw new Error('Invalid article response');
+  }
+
+  return mapArticle(article);
 };
 
 export const submitDonation = async (data: Partial<Donation>): Promise<Donation> => {
@@ -678,9 +741,10 @@ export const submitDonation = async (data: Partial<Donation>): Promise<Donation>
 };
 
 export const fetchDonationHistory = async (guestToken?: string): Promise<Donation[]> => {
-  const response = await apiClient.get<ApiCollectionResponse<BackendDonation>>('/donations/history', {
-    headers: guestToken ? { 'X-Guest-Token': guestToken } : undefined,
-  });
+  const donations = await fetchAllPages<BackendDonation>(
+    '/donations/history',
+    guestToken ? { guest_token: guestToken } : undefined,
+  );
 
-  return unwrapCollection(response.data).map((item) => mapDonation(item));
+  return donations.map((item) => mapDonation(item));
 };

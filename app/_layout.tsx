@@ -26,7 +26,7 @@ import {
 } from '@expo-google-fonts/poppins';
 
 import BackgroundPattern from '@/components/BackgroundPattern';
-import { useColorScheme, View } from 'react-native';
+import { Platform, Text as RNText, TextInput as RNTextInput, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -35,6 +35,24 @@ configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
   strict: false,
 });
+
+if (Platform.OS === 'android') {
+  const MutableText = RNText as unknown as { defaultProps?: Record<string, unknown> };
+  const textDefaults = MutableText.defaultProps ?? {};
+  MutableText.defaultProps = {
+    ...textDefaults,
+    allowFontScaling: false,
+    maxFontSizeMultiplier: 1,
+  };
+
+  const MutableTextInput = RNTextInput as unknown as { defaultProps?: Record<string, unknown> };
+  const textInputDefaults = MutableTextInput.defaultProps ?? {};
+  MutableTextInput.defaultProps = {
+    ...textInputDefaults,
+    allowFontScaling: false,
+    maxFontSizeMultiplier: 1,
+  };
+}
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient({

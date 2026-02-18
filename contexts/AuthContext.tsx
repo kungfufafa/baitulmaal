@@ -77,13 +77,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const resolveAuthenticatedUser = useCallback(async (userFromAuth: User | null, source: 'login' | 'register'): Promise<User> => {
+    if (userFromAuth) {
+      return userFromAuth;
+    }
+
+    try {
+      return await getProfile();
+    } catch (error) {
+      if (__DEV__) console.warn(`Failed to bootstrap profile after ${source}`, error);
+    }
+
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    throw new Error('Autentikasi berhasil, tetapi profil akun tidak dapat dimuat. Silakan coba lagi.');
+  }, []);
+
   const login = useCallback(async (payload: LoginPayload) => {
     if (isMountedRef.current) setLoading(true);
     try {
       const response: AuthResponse = await apiLogin(payload);
       await SecureStore.setItemAsync(AUTH_TOKEN_KEY, response.token);
+      const resolvedUser = await resolveAuthenticatedUser(response.user, 'login');
+
       if (isMountedRef.current) {
-        setUser(response.user);
+        setUser(resolvedUser);
         router.replace('/(tabs)');
       }
     } catch (error) {
@@ -92,15 +109,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       if (isMountedRef.current) setLoading(false);
     }
-  }, []);
+  }, [resolveAuthenticatedUser]);
 
   const register = useCallback(async (payload: RegisterPayload) => {
     if (isMountedRef.current) setLoading(true);
     try {
       const response: AuthResponse = await apiRegister(payload);
       await SecureStore.setItemAsync(AUTH_TOKEN_KEY, response.token);
+      const resolvedUser = await resolveAuthenticatedUser(response.user, 'register');
+
       if (isMountedRef.current) {
-        setUser(response.user);
+        setUser(resolvedUser);
         router.replace('/(tabs)');
       }
     } catch (error) {
@@ -109,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       if (isMountedRef.current) setLoading(false);
     }
-  }, []);
+  }, [resolveAuthenticatedUser]);
 
   const logout = useCallback(async () => {
     if (isMountedRef.current) setLoading(true);

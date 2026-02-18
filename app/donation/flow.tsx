@@ -158,6 +158,12 @@ export default function DonationFlowScreen() {
     return fromConfig.length > 0 ? fromConfig : DEFAULT_RECOMMENDED_AMOUNTS;
   }, [donationConfig?.recommendedAmounts]);
 
+  const activePaymentMethods = useMemo(() => {
+    return (paymentMethods ?? []).filter(
+      (method): method is PaymentMethod => Boolean(method?.id) && method.isActive !== false
+    );
+  }, [paymentMethods]);
+
   const isGuest = !user;
   const isGuestDonorValid = !isGuest || (donorName.trim().length > 1 && donorPhone.trim().length >= 8);
   const selectedContext = contextOptions.find((context) => context.slug === selectedContextSlug);
@@ -272,6 +278,18 @@ export default function DonationFlowScreen() {
   useEffect(() => {
     setCurrentStepIndex((currentIndex) => Math.min(currentIndex, flowSteps.length - 1));
   }, [flowSteps.length]);
+
+  useEffect(() => {
+    setSelectedMethod((currentMethod) => {
+      if (!currentMethod) {
+        return null;
+      }
+
+      return activePaymentMethods.some((method) => method.id === currentMethod.id)
+        ? currentMethod
+        : null;
+    });
+  }, [activePaymentMethods]);
 
   useEffect(() => {
     let isMounted = true;
@@ -861,9 +879,12 @@ export default function DonationFlowScreen() {
       <Text className="text-emerald-300 text-sm font-poppins">Pilih Metode Pembayaran</Text>
       {isLoadingMethods ? (
         <ActivityIndicator size="small" color="#fbbf24" />
+      ) : activePaymentMethods.length === 0 ? (
+        <View className="bg-white/10 border border-white/10 rounded-xl p-4">
+          <Text className="text-white/80 text-sm">Metode pembayaran belum tersedia saat ini.</Text>
+        </View>
       ) : (
-        paymentMethods?.filter(Boolean).map((method) => {
-          if (!method?.id) return null;
+        activePaymentMethods.map((method) => {
           const isSelected = selectedMethod?.id === method.id;
 
           return (

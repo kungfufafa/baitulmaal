@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Baitul Maal",
+    "name": "LAZ Al Azhar 5",
     "slug": "baitulmaal",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -36,7 +36,7 @@
         "android.permission.READ_MEDIA_AUDIO"
       ],
       "package": "com.mekayastudio.baitulmaal",
-      "versionCode": 7
+      "versionCode": 9
     },
     "web": {
       "output": "static",
@@ -57,11 +57,19 @@
           }
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/adzan.wav"
+          ]
+        }
+      ],
       "expo-font",
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Izinkan Baitul Maal mengakses lokasi Anda untuk menampilkan jadwal sholat sesuai wilayah."
+          "locationWhenInUsePermission": "Izinkan LAZ Al Azhar 5 mengakses lokasi Anda untuk menampilkan jadwal sholat sesuai wilayah."
         }
       ],
       [
@@ -74,8 +82,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Izinkan Baitul Maal mengakses foto Anda.",
-          "savePhotosPermission": "Izinkan Baitul Maal menyimpan QRIS ke galeri Anda.",
+          "photosPermission": "Izinkan LAZ Al Azhar 5 mengakses foto Anda.",
+          "savePhotosPermission": "Izinkan LAZ Al Azhar 5 menyimpan QRIS ke galeri Anda.",
           "granularPermissions": [
             "photo"
           ]

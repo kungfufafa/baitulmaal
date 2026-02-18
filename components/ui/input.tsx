@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { Text } from '@/components/ui/text';
 import * as React from 'react';
-import { TextInput, type TextInputProps, View } from 'react-native';
+import { Platform, TextInput, type TextInputProps, View } from 'react-native';
 
 const Input = React.forwardRef<React.ElementRef<typeof TextInput>, TextInputProps>(
-  ({ className, placeholderTextColor, ...props }, ref) => {
+  ({ className, placeholderTextColor, allowFontScaling, maxFontSizeMultiplier, ...props }, ref) => {
     return (
       <TextInput
         ref={ref}
@@ -14,6 +14,14 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, TextInputProp
           className
         )}
         placeholderTextColor={placeholderTextColor ?? 'hsl(164 40% 70%)'}
+        allowFontScaling={
+          allowFontScaling
+          ?? (Platform.OS === 'android' ? false : undefined)
+        }
+        maxFontSizeMultiplier={
+          maxFontSizeMultiplier
+          ?? (Platform.OS === 'android' ? 1 : undefined)
+        }
         {...props}
       />
     );

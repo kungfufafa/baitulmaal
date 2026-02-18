@@ -19,6 +19,15 @@ interface SocialPrayerFeedProps {
     onPressWrite?: () => void;
 }
 
+const toRelativeTime = (value: string) => {
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) {
+        return 'baru saja';
+    }
+
+    return formatDistanceToNow(parsedDate, { addSuffix: true, locale: id });
+};
+
 export default function SocialPrayerFeed({
     showSectionHeader = true,
     showWriteButton = true,
@@ -31,25 +40,33 @@ export default function SocialPrayerFeed({
     const { user } = useAuth();
     const router = useRouter();
 
-    const handleLike = (id: string) => {
+    const handleLike = useCallback((id: string) => {
         if (!user) {
             router.push('/(auth)/login');
             return;
         }
-
-        const isLiked = likedPrayers.has(id);
         
         setLikedPrayers(prev => {
             const next = new Set(prev);
-            if (isLiked) next.delete(id);
+            if (next.has(id)) next.delete(id);
             else next.add(id);
             return next;
         });
 
-        amenMutation.mutate(id);
-    };
+        amenMutation.mutate(id, {
+            onError: () => {
+                // Rollback optimistic UI if the request fails.
+                setLikedPrayers(prev => {
+                    const next = new Set(prev);
+                    if (next.has(id)) next.delete(id);
+                    else next.add(id);
+                    return next;
+                });
+            },
+        });
+    }, [amenMutation, router, user]);
 
-    const handlePostPrayer = () => {
+    const handlePostPrayer = useCallback(() => {
         if (!user) {
             router.push('/(auth)/login');
             return;
@@ -61,11 +78,11 @@ export default function SocialPrayerFeed({
         }
 
         router.push('/(tabs)/doa');
-    };
+    }, [onPressWrite, router, user]);
 
     const renderPrayerItem = useCallback(({ item: prayer }: { item: MemberPrayer }) => {
         const isLiked = likedPrayers.has(prayer.id);
-        const timeAgo = formatDistanceToNow(new Date(prayer.createdAt), { addSuffix: true, locale: id });
+        const timeAgo = toRelativeTime(prayer.createdAt);
 
         return (
             <View className="bg-white/10 rounded-xl p-4 border border-white/5 mb-3">
@@ -121,7 +138,7 @@ export default function SocialPrayerFeed({
                 </View>
             </View>
         );
-    }, [likedPrayers, amenMutation, user, router]);
+    }, [handleLike, likedPrayers]);
 
     if (isLoading) {
         return <ActivityIndicator size="small" color={AMBER_400} className="py-4" />;

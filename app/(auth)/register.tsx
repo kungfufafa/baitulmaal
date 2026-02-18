@@ -5,8 +5,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
+  Text as RNText,
+  TextInput as RNTextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,10 +17,39 @@ import { Mail, Lock, User, ArrowLeft, Eye, EyeOff, Phone } from 'lucide-react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isAndroid = Platform.OS === 'android';
+const textScaleProps = isAndroid
+  ? { allowFontScaling: false, maxFontSizeMultiplier: 1 as const }
+  : undefined;
+
+function Text(props: React.ComponentProps<typeof RNText>) {
+  return <RNText {...textScaleProps} {...props} />;
+}
+
+function TextInput(props: React.ComponentProps<typeof RNTextInput>) {
+  return <RNTextInput {...textScaleProps} {...props} />;
+}
 
 const extractErrorMessage = (error: any): string => {
+  const status = error?.response?.status;
+  const requestUrl = String(error?.config?.url || '');
   const response = error?.response?.data;
   const validationErrors = response?.errors;
+
+  if (status === 429) {
+    return 'Terlalu banyak percobaan. Silakan tunggu sebentar lalu coba lagi.';
+  }
+
+  if (status === 401 && /\/user(\?.*)?$/.test(requestUrl)) {
+    return 'Akun kemungkinan sudah dibuat, tetapi sesi gagal dimuat. Silakan login.';
+  }
+
+  if (!error?.response) {
+    if (error?.code === 'ECONNABORTED') {
+      return 'Koneksi ke server timeout. Coba lagi.';
+    }
+    return 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+  }
 
   if (validationErrors && typeof validationErrors === 'object') {
     const firstFieldErrors = Object.values(validationErrors).find(
@@ -32,7 +61,11 @@ const extractErrorMessage = (error: any): string => {
     }
   }
 
-  return response?.message || 'Gagal membuat akun. Coba lagi.';
+  if (typeof response === 'string' && response.trim().length > 0) {
+    return response;
+  }
+
+  return response?.message || error?.message || 'Gagal membuat akun. Coba lagi.';
 };
 
 export default function RegisterScreen() {

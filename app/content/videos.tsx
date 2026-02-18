@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 const toRelativeTime = (value?: string) => {
   if (!value) {
@@ -34,11 +34,25 @@ export default function ContentVideosScreen() {
     }
   }, [refetch]);
 
-  const handleVideoPress = (video: Video) => {
-    if (video.youtubeId) {
-      Linking.openURL(`https://www.youtube.com/watch?v=${video.youtubeId}`);
+  const handleVideoPress = useCallback(async (video: Video) => {
+    if (!video.youtubeId) {
+      return;
     }
-  };
+
+    const url = `https://www.youtube.com/watch?v=${video.youtubeId}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) {
+        Alert.alert('Tidak dapat membuka video', 'Perangkat tidak mendukung membuka tautan YouTube.');
+        return;
+      }
+
+      await Linking.openURL(url);
+    } catch (error) {
+      if (__DEV__) console.warn('Failed to open video URL', error);
+      Alert.alert('Gagal membuka video', 'Silakan coba lagi.');
+    }
+  }, []);
 
   return (
     <ScreenShell title="🎥 Video Kajian" scrollable={false}>

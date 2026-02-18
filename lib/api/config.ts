@@ -1,11 +1,15 @@
-const raw = (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/+$/, '');
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim() ?? '';
+const fallbackApiUrl = 'http://localhost:8000/api';
 
-if (!raw || raw.trim().length === 0) {
+if (!configuredApiUrl) {
   if (!__DEV__) {
-    throw new Error('EXPO_PUBLIC_API_URL is not configured. Set it in your .env file.');
+    throw new Error('EXPO_PUBLIC_API_URL is not configured. Set it in your environment.');
   }
-  console.warn('API URL is not configured. Please set EXPO_PUBLIC_API_URL in your .env file');
+
+  console.warn(`EXPO_PUBLIC_API_URL is not configured. Falling back to ${fallbackApiUrl}.`);
 }
+
+const raw = (configuredApiUrl || fallbackApiUrl).replace(/\/+$/, '');
 
 export const API_URL = raw;
 export const API_HOST = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;

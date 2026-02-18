@@ -3,10 +3,12 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { PrayerTime } from '@/types';
 
-const ANDROID_CHANNEL_ID = 'prayer-times';
+const LEGACY_ANDROID_CHANNEL_ID = 'prayer-times';
+const ANDROID_CHANNEL_ID = 'prayer-times-adzan-v2';
 const QURAN_CHANNEL_ID = 'quran-reminder';
 const PRAYER_IDS_KEY = 'notification_prayer_ids_v1';
 const QURAN_REMINDER_KEY = 'notification_quran_reminder_id_v1';
+const PRAYER_SOUND_FILE = 'adzan.wav';
 
 export const initNotifications = () => {
   if (Platform.OS === 'web') return;
@@ -36,10 +38,17 @@ export async function ensureNotificationPermission() {
 export async function ensurePrayerNotificationChannel() {
   if (Platform.OS !== 'android') return;
 
+  // Android channels are immutable after creation; use a new id for sound updates.
+  try {
+    await Notifications.deleteNotificationChannelAsync(LEGACY_ANDROID_CHANNEL_ID);
+  } catch (e) {
+    if (__DEV__) console.warn('Failed to delete legacy prayer channel', e);
+  }
+
   await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
-    name: 'Jadwal Sholat',
+    name: 'Jadwal Sholat (Adzan)',
     importance: Notifications.AndroidImportance.HIGH,
-    sound: 'default',
+    sound: PRAYER_SOUND_FILE,
     vibrationPattern: [0, 250, 250, 250],
     lightColor: '#FFD700',
   });
@@ -75,7 +84,7 @@ export async function schedulePrayerNotifications(prayers: PrayerTime[], city: s
       content: {
         title: 'Waktu Sholat',
         body: `Saatnya sholat ${prayer.name} di ${city}`,
-        sound: 'default',
+        sound: PRAYER_SOUND_FILE,
         ...(Platform.OS === 'android' ? { channelId: ANDROID_CHANNEL_ID } : null),
       },
       trigger: {

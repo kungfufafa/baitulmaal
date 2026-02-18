@@ -198,7 +198,7 @@ export interface User {
 }
 
 export interface AuthResponse {
-  user: User;
+  user: User | null;
   token: string;
 }
 

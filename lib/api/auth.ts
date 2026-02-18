@@ -2,24 +2,45 @@ import apiClient from './client';
 import { AuthResponse, LoginPayload, RegisterPayload, User } from '../../types';
 
 type BackendAuthResponse = {
-  access_token: string;
+  access_token?: string;
   token_type?: string;
 };
 
 const mapAuthResponse = async (payload: BackendAuthResponse): Promise<AuthResponse> => {
-  const token = payload.access_token;
-  const tokenType = payload.token_type || 'Bearer';
+  const token = String(payload.access_token ?? '').trim();
+  if (!token) {
+    throw new Error('Missing access token from authentication response.');
+  }
 
-  const profileResponse = await apiClient.get<User>('/user', {
-    headers: {
-      Authorization: `${tokenType} ${token}`,
-    },
-  });
+  const tokenType = (payload.token_type || 'Bearer').trim() || 'Bearer';
 
-  return {
-    user: profileResponse.data,
-    token,
-  };
+  try {
+    const profileResponse = await apiClient.get<User>('/user', {
+      headers: {
+        Authorization: `${tokenType} ${token}`,
+        'X-Auth-Bootstrap': '1',
+      },
+    });
+
+    return {
+      user: profileResponse.data,
+      token,
+    };
+  } catch (error: any) {
+    const status = error?.response?.status;
+    if (status === 401) {
+      throw error;
+    }
+
+    if (__DEV__) {
+      console.warn('Auth bootstrap profile request failed; continuing with token only.', error);
+    }
+
+    return {
+      user: null,
+      token,
+    };
+  }
 };
 
 export const login = async (payload: LoginPayload): Promise<AuthResponse> => {

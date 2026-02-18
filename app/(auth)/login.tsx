@@ -5,8 +5,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
+  Text as RNText,
+  TextInput as RNTextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,10 +18,38 @@ import Logo from '@/components/Logo';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isAndroid = Platform.OS === 'android';
+const textScaleProps = isAndroid
+  ? { allowFontScaling: false, maxFontSizeMultiplier: 1 as const }
+  : undefined;
+
+function Text(props: React.ComponentProps<typeof RNText>) {
+  return <RNText {...textScaleProps} {...props} />;
+}
+
+function TextInput(props: React.ComponentProps<typeof RNTextInput>) {
+  return <RNTextInput {...textScaleProps} {...props} />;
+}
 
 const extractErrorMessage = (error: any): string => {
+  const status = error?.response?.status;
   const response = error?.response?.data;
   const validationErrors = response?.errors;
+
+  if (status === 401) {
+    return 'Email atau password salah.';
+  }
+
+  if (status === 429) {
+    return 'Terlalu banyak percobaan. Silakan tunggu sebentar lalu coba lagi.';
+  }
+
+  if (!error?.response) {
+    if (error?.code === 'ECONNABORTED') {
+      return 'Koneksi ke server timeout. Coba lagi.';
+    }
+    return 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+  }
 
   if (validationErrors && typeof validationErrors === 'object') {
     const firstFieldErrors = Object.values(validationErrors).find(
@@ -33,7 +61,11 @@ const extractErrorMessage = (error: any): string => {
     }
   }
 
-  return response?.message || 'Gagal login. Coba lagi.';
+  if (typeof response === 'string' && response.trim().length > 0) {
+    return response;
+  }
+
+  return response?.message || error?.message || 'Gagal login. Coba lagi.';
 };
 
 export default function LoginScreen() {

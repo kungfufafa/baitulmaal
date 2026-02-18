@@ -114,13 +114,31 @@ export default function HomeScreen() {
         });
     };
 
-    const handleOpenVideo = (video: Video) => {
+    const openExternalUrl = useCallback(async (url: string) => {
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (!supported) {
+                showToast('Tautan video tidak didukung di perangkat ini.', '⚠️');
+                return false;
+            }
+            await Linking.openURL(url);
+            return true;
+        } catch (error) {
+            if (__DEV__) console.warn('Failed to open external URL', error);
+            showToast('Gagal membuka tautan video.', '⚠️');
+            return false;
+        }
+    }, [showToast]);
+
+    const handleOpenVideo = useCallback(async (video: Video) => {
         if (video.youtubeId) {
-            Linking.openURL(`https://www.youtube.com/watch?v=${video.youtubeId}`);
-            return;
+            const opened = await openExternalUrl(`https://www.youtube.com/watch?v=${video.youtubeId}`);
+            if (opened) {
+                return;
+            }
         }
         router.push('/content/videos');
-    };
+    }, [openExternalUrl, router]);
 
     const handleOpenArticle = (article: Article) => {
         router.push({

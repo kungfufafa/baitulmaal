@@ -12,6 +12,8 @@ function TabBarIcon({ name, label, focused }: { name: keyof typeof Feather.glyph
                 className={`text-[10px] mt-1 font-poppins ${focused ? 'text-amber-400 font-medium' : 'text-white/70'
                     }`}
                 numberOfLines={1}
+                allowFontScaling={Platform.OS !== 'android'}
+                maxFontSizeMultiplier={Platform.OS === 'android' ? 1 : undefined}
             >
                 {label}
             </Text>

@@ -1,6 +1,6 @@
 import ScreenShell from '@/components/ScreenShell';
 import { Text } from '@/components/ui/text';
-import { useArticles } from '@/hooks/useBaitulMaal';
+import { useArticle, useArticles } from '@/hooks/useBaitulMaal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -45,19 +45,31 @@ export default function ArticleDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[]; slug?: string | string[] }>();
   const articleId = typeof params.id === 'string' ? params.id : '';
   const slug = typeof params.slug === 'string' ? params.slug : '';
-  const { data: articles, isLoading, refetch } = useArticles();
+  const {
+    data: articleBySlug,
+    isLoading: isLoadingArticleBySlug,
+    refetch: refetchArticleBySlug,
+  } = useArticle(slug, Boolean(slug));
+  const { data: articles, isLoading: isLoadingArticles, refetch: refetchArticles } = useArticles();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      await refetch();
+      await Promise.all([
+        refetchArticles(),
+        slug ? refetchArticleBySlug() : Promise.resolve(),
+      ]);
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetch]);
+  }, [refetchArticleBySlug, refetchArticles, slug]);
 
   const article = useMemo(() => {
+    if (articleBySlug) {
+      return articleBySlug;
+    }
+
     if (!articles?.length) {
       return null;
     }
@@ -74,7 +86,7 @@ export default function ArticleDetailScreen() {
         return false;
       }) ?? null
     );
-  }, [articleId, articles, slug]);
+  }, [articleBySlug, articleId, articles, slug]);
 
   const contentText = useMemo(() => {
     if (!article) {
@@ -82,6 +94,8 @@ export default function ArticleDetailScreen() {
     }
     return normalizeArticleContent(article.content || article.excerpt || '');
   }, [article]);
+
+  const isLoading = isLoadingArticles || (Boolean(slug) && isLoadingArticleBySlug);
 
   return (
     <ScreenShell title="📰 Detail Artikel" scrollable={false}>

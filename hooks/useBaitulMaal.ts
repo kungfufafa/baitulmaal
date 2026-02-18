@@ -6,6 +6,7 @@ import {
   toggleAmen, 
   fetchVideos, 
   fetchArticles, 
+  fetchArticleBySlug,
   submitDonation,
   fetchDonationHistory,
   fetchDonationConfig,
@@ -17,9 +18,9 @@ import {
   MOCK_VIDEOS, 
   MOCK_ARTICLES 
 } from '../lib/mock-data';
-import { MemberPrayer, Donation, DonationConfig, ZakatCalculationPayload, ZakatCalculationResult } from '../types';
+import { MemberPrayer, Donation, DonationConfig, ZakatCalculationPayload, ZakatCalculationResult, Article } from '../types';
 
-const USE_REAL_API = !__DEV__ || true;
+const USE_REAL_API = process.env.EXPO_PUBLIC_USE_MOCK_API !== '1';
 
 // Simulated delay for mock data
 const SIMULATED_DELAY = 1000;
@@ -124,6 +125,28 @@ export const useArticles = () => {
         return fetchArticles();
       }
       return simulateApiCall(MOCK_ARTICLES);
+    },
+  });
+};
+
+export const useArticle = (slug?: string, enabled = true) => {
+  return useQuery({
+    queryKey: ['article', slug],
+    enabled: enabled && Boolean(slug),
+    queryFn: async (): Promise<Article> => {
+      if (!slug) {
+        throw new Error('Article slug is required');
+      }
+
+      if (USE_REAL_API) {
+        return fetchArticleBySlug(slug);
+      }
+
+      const fallback = MOCK_ARTICLES.find((item) => item.slug === slug) ?? MOCK_ARTICLES[0];
+      if (!fallback) {
+        throw new Error('Mock article not found');
+      }
+      return simulateApiCall(fallback);
     },
   });
 };
