@@ -1,5 +1,12 @@
-import { Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 
 export default function DonasiPlaceholder() {
-    return <Redirect href={{ pathname: '/donation/flow', params: { category: 'sedekah' } }} />;
+    const router = useRouter();
+
+    useEffect(() => {
+        router.replace({ pathname: '/donation/flow', params: { category: 'sedekah' } });
+    }, [router]);
+
+    return null;
 }

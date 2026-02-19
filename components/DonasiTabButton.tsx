@@ -1,15 +1,19 @@
 import { EMERALD_900 } from '@/constants/colors';
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { GestureResponderEvent, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Text, TouchableOpacity } from 'react-native';
 
-interface DonasiTabButtonProps {
-    style?: ViewStyle;
-    onPress?: (e: GestureResponderEvent) => void;
-}
-
-export default function DonasiTabButton({ style, ...otherProps }: DonasiTabButtonProps) {
+export default function DonasiTabButton({
+    style,
+    accessibilityState,
+    accessibilityLabel,
+    accessibilityRole,
+    accessibilityHint,
+    testID,
+    onLongPress,
+}: BottomTabBarButtonProps) {
     const router = useRouter();
 
     const handlePress = (e: GestureResponderEvent) => {
@@ -23,6 +27,13 @@ export default function DonasiTabButton({ style, ...otherProps }: DonasiTabButto
     return (
         <TouchableOpacity
             onPress={handlePress}
+            onLongPress={onLongPress ?? undefined}
+            activeOpacity={0.9}
+            accessibilityState={accessibilityState}
+            accessibilityLabel={accessibilityLabel}
+            accessibilityRole={accessibilityRole}
+            accessibilityHint={accessibilityHint}
+            testID={testID}
             style={[style, {
                 top: -30,
                 justifyContent: 'center',
@@ -31,7 +42,6 @@ export default function DonasiTabButton({ style, ...otherProps }: DonasiTabButto
                 height: 80,
                 flexDirection: 'column',
             }]}
-            {...otherProps}
         >
             <LinearGradient
                 colors={['#d4af37', '#f4d03f', '#d4af37']}

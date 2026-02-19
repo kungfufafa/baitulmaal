@@ -70,9 +70,14 @@ export default function TabLayout() {
             />
             <Tabs.Screen
                 name="donasi"
+                listeners={{
+                    tabPress: (event) => {
+                        event.preventDefault();
+                    },
+                }}
                 options={{
                     title: 'Donasi',
-                    tabBarButton: (props) => <DonasiTabButton {...props} style={props.style as any} />,
+                    tabBarButton: (props) => <DonasiTabButton {...props} />,
                 }}
             />
             <Tabs.Screen
