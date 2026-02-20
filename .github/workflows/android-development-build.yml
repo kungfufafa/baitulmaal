@@ -1,0 +1,57 @@
+name: Android Development Build
+
+on:
+  push:
+    branches:
+      - develop
+      - feature/*
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android Dev APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 🔧 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Android Dev APK
+        run: |
+          # Install EAS CLI locally
+          npm install -g eas-cli
+
+          # Build development APK
+          eas build --platform android --profile development --non-interactive
+
+      - name: 📤 Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-dev-apk
+          path: |
+            *.apk
+          retention-days: 7
+
+      - name: 🔔 Notify
+        if: success()
+        run: |
+          echo "✅ Development build completed!"
+          echo "📦 Download APK from Actions tab"

@@ -1,0 +1,84 @@
+name: Android Production Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 🔧 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📱 Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: 📥 Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔑 Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', **/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 🔐 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 🏗️ Build Android AAB
+        run: |
+          # Install EAS CLI locally
+          npm install -g eas-cli
+
+          # Build using EAS (uses remote build service)
+          eas build --platform android --profile production --non-interactive
+
+      - name: 📤 Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: |
+            *.aab
+            *.apk
+          retention-days: 30
+
+      - name: 🔔 Notify on Success
+        if: success()
+        run: |
+          echo "✅ Android build completed successfully!"
+          echo "📦 Download the artifact from the Actions tab"
+
+      - name: ❌ Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Android build failed!"
+          echo "🔍 Check the logs for more details"
