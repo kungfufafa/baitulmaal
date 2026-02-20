@@ -7,7 +7,7 @@
     "icon": "./assets/images/ios_appstore_icon_1024.png",
     "scheme": "baitulmaal",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "icon": "./assets/images/ios_appstore_icon_1024.png",
@@ -36,7 +36,7 @@
         "android.permission.READ_MEDIA_AUDIO"
       ],
       "package": "com.mekayastudio.baitulmaal",
-      "versionCode": 13
+      "versionCode": 14
     },
     "web": {
       "output": "static",

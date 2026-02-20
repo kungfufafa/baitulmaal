@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { DonationProvider } from '@/contexts/DonationContext';
 import { QuranProvider } from '@/contexts/QuranContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -100,29 +101,31 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <DonationProvider>
-            <QuranProvider>
-              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <SafeAreaProvider>
-                  <View className="flex-1 bg-emerald-900">
-                    <BackgroundPattern />
-                    <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
-                      <Stack.Screen name="content" />
-                      <Stack.Screen name="(auth)" />
-                      <Stack.Screen name="donation" />
-                    </Stack>
-                    <StatusBar style="light" />
-                    <PortalHost />
-                  </View>
-                </SafeAreaProvider>
-              </ThemeProvider>
-            </QuranProvider>
-          </DonationProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <DonationProvider>
+              <QuranProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                  <SafeAreaProvider>
+                    <View className="flex-1 bg-emerald-900">
+                      <BackgroundPattern />
+                      <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
+                        <Stack.Screen name="content" />
+                        <Stack.Screen name="(auth)" />
+                        <Stack.Screen name="donation" />
+                      </Stack>
+                      <StatusBar style="light" />
+                      <PortalHost />
+                    </View>
+                  </SafeAreaProvider>
+                </ThemeProvider>
+              </QuranProvider>
+            </DonationProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

@@ -11,16 +11,20 @@ const QURAN_REMINDER_KEY = 'notification_quran_reminder_id_v1';
 const PRAYER_SOUND_FILE = 'adzan.wav';
 
 export const initNotifications = () => {
-  if (Platform.OS === 'web') return;
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
+  try {
+    if (Platform.OS === 'web') return;
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch (error) {
+    if (__DEV__) console.error('Failed to initialize notifications:', error);
+  }
 };
 
 export async function ensureNotificationPermission() {
