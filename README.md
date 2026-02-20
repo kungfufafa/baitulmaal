@@ -1,4 +1,7 @@
-# Welcome to your Expo app 👋
+# LAZ Al Azhar 5
+
+![Android Build](https://github.com/kungfufafa/baitulmaal/actions/workflows/android-build.yml/badge.svg)
+![Android Dev Build](https://github.com/kungfufafa/baitulmaal/actions/workflows/android-development-build.yml/badge.svg)
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
