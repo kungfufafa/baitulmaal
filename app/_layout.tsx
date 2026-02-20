@@ -82,7 +82,18 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    initNotifications();
+    // Safe initialization with delay to avoid startup race conditions
+    const timeoutId = setTimeout(() => {
+      try {
+        initNotifications();
+      } catch (error) {
+        if (__DEV__) {
+          console.error('Failed to init notifications in useEffect:', error);
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -101,31 +112,33 @@ export default function RootLayout() {
   }
 
   return (
-    <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <DonationProvider>
-              <QuranProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                  <SafeAreaProvider>
-                    <View className="flex-1 bg-emerald-900">
-                      <BackgroundPattern />
-                      <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
-                        <Stack.Screen name="content" />
-                        <Stack.Screen name="(auth)" />
-                        <Stack.Screen name="donation" />
-                      </Stack>
-                      <StatusBar style="light" />
-                      <PortalHost />
-                    </View>
-                  </SafeAreaProvider>
-                </ThemeProvider>
-              </QuranProvider>
-            </DonationProvider>
-          </AuthProvider>
+          <ErrorBoundary fallback={<View className="flex-1 bg-emerald-900" />}>
+            <AuthProvider>
+              <DonationProvider>
+                <QuranProvider>
+                  <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <SafeAreaProvider>
+                      <View className="flex-1 bg-emerald-900">
+                        <BackgroundPattern />
+                        <Stack screenOptions={{ contentStyle: { backgroundColor: 'transparent' }, headerShown: false }}>
+                          <Stack.Screen name="content" />
+                          <Stack.Screen name="(auth)" />
+                          <Stack.Screen name="donation" />
+                        </Stack>
+                        <StatusBar style="light" />
+                        <PortalHost />
+                      </View>
+                    </SafeAreaProvider>
+                  </ThemeProvider>
+                </QuranProvider>
+              </DonationProvider>
+            </AuthProvider>
+          </ErrorBoundary>
         </QueryClientProvider>
-      </GestureHandlerRootView>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
